@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block head %} {% endblock %}
+
+    <!-- Bootstrap CSS -->
+    <link href="{{ url_for('static', filename='css/'+settings['misc']['theme']) }}" rel="stylesheet">
+
+    <!-- FontAwesome CSS -->
+	<link href="{{ url_for('static', filename='css/all.css') }}" rel="stylesheet">
+
+    <!-- WebApp Manifest -->
+    <link rel="manifest" href="{{ url_for('manifest') }}">
+
+    <!-- Favicon -->
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon" type="image/x-icon" />
+    
+    <!-- Apple Icons  -->
+    <link rel="apple-touch-icon"  sizes="96x96" href="{{ url_for('static', filename='img/launcher-icon-2x.png') }}"/>
+    <link rel="apple-touch-icon"  sizes="144x144" href="{{ url_for('static', filename='img/launcher-icon-3x.png') }}"/>
+    <link rel="apple-touch-icon"  sizes="192x192" href="{{ url_for('static', filename='img/launcher-icon-4x.png') }}"/>
+    
+    <!-- Page Title  -->
+    <title>{% block title %} {% endblock %}</title>
+  </head>
+  <body>
+	{% block navbar %}
+	<!-- Navbar Header -->
+	<nav class="navbar sticky-top navbar-dark bg-dark shadow">
+		<div class="container-fluid">
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<a class="navbar-brand" href="/">
+				<b><i class="fas fa-home"></i>&nbsp;Garage<i class="text-primary">Zero</i></b>
+			</a>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="nav navbar-nav me-auto mb-2 mb-lg-0">
+					{% block navbaritems %}
+					<li class="nav-item">
+						<a class="nav-link" href="/"><i class="fas fa-tachometer-alt"></i>&nbsp; Dashboard</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/history"><i class="fas fa-history"></i>&nbsp; History</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/settings"><i class="fas fa-cogs"></i>&nbsp; Settings</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/admin"><i class="fas fa-users-cog"></i>&nbsp; Admin</a>
+					</li>
+					
+					<li class="nav-item">
+						<form name="login" method="POST" action="/login"> 
+							<button type="submit" class="btn btn-secondary" id="logout" name="logout" value="logout" {% if settings['misc']['password'] == False %} style="display:none"{% endif %}>
+							Logout
+							</button> 
+					</form>
+					</li>
+					
+					{% endblock %}
+				</ul>
+			</div>
+		</div>
+	</nav><br>
+	{% endblock %}
+	{% block notify %} {% endblock %}<br>
+	{% block content %} {% endblock %}<br>
+	<!-- jQuery and Bootstrap Bundle (includes Popper) -->
+	<script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+	{% block scripts %} {% endblock %}
+  </body>
+</html>

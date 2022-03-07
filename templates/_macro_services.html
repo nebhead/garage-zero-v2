@@ -1,0 +1,170 @@
+{% macro render_email(form) %}
+	<strong><i class="far fa-envelope"></i>&nbsp; E-Mail Notifications </strong><br><br>
+
+	<p><strong>Description:</strong> Get notifications via e-mail.  You'll need a mail server and credentials for the server.  Please fill in the required fields below.</p>
+
+	{{ form.id(class_='form-control', **kwargs)|safe }}
+	{{ form.ntype(class_='form-control', **kwargs)|safe }}
+
+	<div class="input-group mb-3">
+		<span class="input-group-text" id="{{ form.sname.name }}">{{ form.sname.label.text }}</span>
+		{{ form.sname(class_='form-control', **kwargs)|safe }}
+	</div>
+
+	<div class="input-group mb-3">
+		<span class="input-group-text" id="{{ form.to_email.name }}">{{ form.to_email.label.text }}</span>
+		{{ form.to_email(class_='form-control', **kwargs)|safe }}
+			{% for error in form.to_email.errors %}
+			<br><small style="color:red;">{{ error }}</small>
+			{% endfor %}
+	</div>
+
+	<div class="input-group mb-3">
+		<span class="input-group-text" id="{{ form.from_email.name }}">{{ form.from_email.label.text }}</span>
+		{{ form.from_email(class_='form-control', **kwargs)|safe }}
+			{% for error in form.from_email.errors %}
+			<br><small style="color:red;">{{ error }}</small>
+			{% endfor %}
+	</div>
+
+	<div class="input-group mb-3">
+		<span class="input-group-text" id="{{ form.username.name }}">{{ form.username.label.text }}</span>
+		{{ form.username(class_='form-control', **kwargs)|safe }}
+			{% for error in form.username.errors %}
+			<br><small style="color:red;">{{ error }}</small>
+			{% endfor %}
+	</div>
+
+	<div class="input-group mb-3">
+		<span class="input-group-text" id="{{ form.password.name }}">{{ form.password.label.text }}</span>
+		{{ form.password(class_='form-control', **kwargs)|safe }}
+			{% for error in form.password.errors %}
+			<br><small style="color:red;">{{ error }}</small>
+			{% endfor %}
+</div>
+
+	<div class="input-group mb-3">
+		<span class="input-group-text" id="{{ form.smtpserver.name }}">{{ form.smtpserver.label.text }}</span>
+		{{ form.smtpserver(class_='form-control', **kwargs)|safe }}
+			{% for error in form.smtpserver.errors %}
+			<br><small style="color:red;">{{ error }}</small>
+			{% endfor %}
+</div>
+
+	<div class="input-group mb-3">
+		<span class="input-group-text" id="{{ form.smtpport.name }}">{{ form.smtpport.label.text }}</span>
+		{{ form.smtpport(class_='form-control', **kwargs)|safe }}
+		{% for error in form.smtpport.errors %}
+		<br><small style="color:red;">{{ error }}</small>
+		{% endfor %}
+</div>
+
+	<div class="form-check">
+		{{ form.tls(class_='form-check-input', **kwargs)|safe }}
+		<label class="form-check-label" for="tls_{{ form.id.data }}">
+		Enable TLS
+		</label>
+	</div>
+{% endmacro %}
+
+{% macro render_ifttt(form) %}
+
+<strong><i class="far fa-comment-alt"></i>&nbsp; IFTTT </strong><br><br>
+
+<p><strong>Description:</strong> Get notifications from the IFTTT's Android/iOS app.  All that is needed is an API Key and Event.  This application forms the notification request as follows: <i>https://maker.ifttt.com/trigger/<b>[iftttevent]</b>/with/key/<b>[apikey]</b></i>. More information here: <a href="https://www.ifttt.com/" target="blank">https://www.ifttt.com/</a></p>
+
+{{ form.id(class_='form-control', **kwargs)|safe }}
+{{ form.ntype(class_='form-control', **kwargs)|safe }}
+
+<div class="input-group mb-3">
+	<span class="input-group-text" id="{{ form.sname.name }}">{{ form.sname.label.text }}</span>
+	{{ form.sname(class_='form-control', **kwargs)|safe }}
+</div>
+
+<div class="input-group mb-3">
+	<span class="input-group-text" id="{{ form.apikey.name }}">{{ form.apikey.label.text }}</span>
+	{{ form.apikey(class_='form-control', **kwargs)|safe }}
+	{% for error in form.apikey.errors %}
+	<br><small style="color:red;">{{ error }}</small>
+	{% endfor %}
+</div>
+
+<div class="input-group mb-3">
+	<span class="input-group-text" id="{{ form.iftttevent.name }}">{{ form.iftttevent.label.text }}</span>
+	{{ form.iftttevent(class_='form-control', **kwargs)|safe }}
+	{% for error in form.iftttevent.errors %}
+	<br><small style="color:red;">{{ error }}</small>
+	{% endfor %}
+</div>
+
+{% endmacro %}
+
+{% macro render_pushbullet(form) %}
+
+<strong><i class="far fa-comment-alt"></i>&nbsp; PushBullet </strong><br><br>
+
+<p><strong>Description:</strong> Get notifications from the PushBullet Service.  All that is needed is an API Key.  More information here: <a href="https://www.pushbullet.com/" target="blank">https://www.pushbullet.com/</a></p>
+
+{{ form.id(class_='form-control', **kwargs)|safe }}
+{{ form.ntype(class_='form-control', **kwargs)|safe }}
+
+<div class="input-group mb-3">
+	<span class="input-group-text" id="{{ form.sname.name }}">{{ form.sname.label.text }}</span>
+	{{ form.sname(class_='form-control', **kwargs)|safe }}
+</div>
+
+<div class="input-group mb-3">
+	<span class="input-group-text" id="{{ form.apikey.name }}">{{ form.apikey.label.text }}</span>
+	{{ form.apikey(class_='form-control', **kwargs)|safe }}
+	{% for error in form.apikey.errors %}
+	<br><small style="color:red;">{{ error }}</small>
+	{% endfor %}
+</div>
+
+{% endmacro %}
+
+{% macro render_pushover(form) %}
+
+<strong><i class="far fa-comment-alt"></i>&nbsp; PushOver </strong><br><br>
+
+<p><strong>Description:</strong> Get notifications from the PushOver Service.  All that is needed is an API Key and User Key.  If entering more than one User Key, seperate with commas.  More information here: <a href="https://www.pushover.net/" target="blank">https://www.pushover.net/</a></p>
+
+{{ form.id(class_='form-control', **kwargs)|safe }}
+{{ form.ntype(class_='form-control', **kwargs)|safe }}
+
+<div class="input-group mb-3">
+	<span class="input-group-text" id="{{ form.sname.name }}">{{ form.sname.label.text }}</span>
+	{{ form.sname(class_='form-control', **kwargs)|safe }}
+</div>
+
+<div class="input-group mb-3">
+	<span class="input-group-text" id="{{ form.apikey.name }}">{{ form.apikey.label.text }}</span>
+	{{ form.apikey(class_='form-control', **kwargs)|safe }}
+	{% for error in form.apikey.errors %}
+	<br><small style="color:red;">{{ error }}</small>
+	{% endfor %}
+</div>
+
+<div class="input-group mb-3">
+	<span class="input-group-text" id="{{ form.userkeys.name }}">{{ form.userkeys.label.text }}</span>
+	{{ form.userkeys(class_='form-control', **kwargs)|safe }}
+	{% for error in form.userkeys.errors %}
+	<br><small style="color:red;">{{ error }}</small>
+	{% endfor %}
+</div>
+
+{% endmacro %}
+
+{% macro render_proto(form) %}
+
+<strong><i class="fas fa-cube"></i>&nbsp; Prototype / Test Service</strong><br><br>
+
+{{ form.id(class_='form-control', **kwargs)|safe }}
+{{ form.ntype(class_='form-control', **kwargs)|safe }}
+
+<div class="input-group mb-3">
+	<span class="input-group-text" id="{{ form.sname.name }}">{{ form.sname.label.text }}</span>
+	{{ form.sname(class_='form-control', **kwargs)|safe }}
+</div>
+
+{% endmacro %}

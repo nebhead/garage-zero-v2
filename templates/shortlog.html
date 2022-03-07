@@ -1,0 +1,100 @@
+<div class="table-responsive">
+  <table class="table table-striped">
+      <thead class="thead-dark">
+        <tr>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Event</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if events > 0 %}
+          {% if settings['misc']['listorder'] == 'bottomup' %}
+            {% for row in range(events) %}
+            <tr>
+              {% for column in range(3) %}
+				{% if 'SHUTDOWN' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-power-off"></i>&nbsp; Power Off </td>
+				{% elif 'REBOOT' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-sync-alt"></i>&nbsp; Rebooted </td>
+				{% elif 'STARTUP' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-play"></i>&nbsp; Startup </td>
+				{% elif 'REMIND' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-history"></i>&nbsp; Reminder Sent </td>
+				{% elif 'SETTINGS' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-tools"></i>&nbsp; Settings Change </td>
+				{% elif 'NOTIFY' in door_history[events-1-row][column] %}
+					<td> <i class="far fa-bell"></i>&nbsp; Notification Sent </td>
+				{% elif 'BUTTON' in door_history[events-1-row][column] %}
+					<td> <i class="far fa-hand-point-down"></i>&nbsp; Button Pressed </td>
+				{% elif 'CLOSED' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-door-closed"></i>&nbsp; Door Closed </td>
+				{% elif 'OPENED' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-door-open"></i>&nbsp; Door Opened </td>
+				{% elif 'OPEN' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-door-open"></i>&nbsp; Door is Open </td>
+				{% elif 'ERROR' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-bomb"></i>&nbsp; Error! </td>
+				{% elif 'LOGIN' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-user-check"></i>&nbsp; User logged in </td>
+				{% elif 'LOGOUT' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-user-alt-slash"></i>&nbsp; User logged out </td>
+				{% elif 'DENIED' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-exclamation-circle"></i>&nbsp; Access Denied </td>
+				{% elif 'API' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-globe"></i>&nbsp; API Call </td>
+				{% else %}
+					<td> {{ door_history[events-1-row][column] }} </td>
+				{% endif %}
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          {% else %}
+            {% for row in range(events) %}
+            <tr>
+              {% for column in range(3) %}
+				{% if 'SHUTDOWN' in door_history[row][column] %}
+					<td> <i class="fas fa-power-off"></i> Power Off </td>
+				{% elif 'REBOOT' in door_history[row][column] %}
+					<td> <i class="fas fa-sync-alt"></i>&nbsp; Rebooted </td>
+				{% elif 'STARTUP' in door_history[row][column] %}
+					<td> <i class="fas fa-play"></i>&nbsp; Startup </td>
+				{% elif 'REMIND' in door_history[row][column] %}
+					<td> <i class="fas fa-history"></i>&nbsp; Reminder Sent </td>
+				{% elif 'SETTINGS' in door_history[row][column] %}
+					<td> <i class="fas fa-tools"></i>&nbsp; Settings Change </td>
+				{% elif 'NOTIFY' in door_history[row][column] %}
+					<td> <i class="far fa-bell"></i>&nbsp; Notification Sent </td>
+				{% elif 'BUTTON' in door_history[row][column] %}
+					<td> <i class="far fa-hand-point-down"></i>&nbsp; Button Pressed </td>
+				{% elif 'CLOSED' in door_history[row][column] %}
+					<td> <i class="fas fa-door-closed"></i>&nbsp; Door Closed </td>
+				{% elif 'OPENED' in door_history[row][column] %}
+					<td> <i class="fas fa-door-open"></i>&nbsp; Door Opened </td>
+				{% elif 'OPEN' in door_history[row][column] %}
+					<td> <i class="fas fa-door-open"></i>&nbsp; Door is Open </td>
+				{% elif 'ERROR' in door_history[row][column] %}
+					<td> <i class="fas fa-bomb"></i>&nbsp; Error! </td>
+				{% elif 'EXIT' in door_history[row][column] %}
+					<td> <i class="fas fa-power-off"></i>&nbsp; Control Script Exit </td>
+				{% elif 'LOGIN' in door_history[row][column] %}
+					<td> <i class="fas fa-user-check"></i>&nbsp; User logged in </td>
+				{% elif 'LOGOUT' in door_history[row][column] %}
+					<td> <i class="fas fa-user-alt-slash"></i>&nbsp; User logged out </td>
+				{% elif 'DENIED' in door_history[row][column] %}
+					<td> <i class="fas fa-exclamation-circle"></i>&nbsp; Access Denied </td>
+				{% elif 'API' in door_history[row][column] %}
+					<td> <i class="fas fa-globe"></i>&nbsp; API Call </td>
+				{% else %}
+            		<td> {{ door_history[row][column] }} </td>
+				{% endif %}
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          {% endif %}
+        {% else %}
+          <tr> <td>No Data Yet.</td> <td></td> <td></td> </tr>
+        {% endif %}
+      </tbody>
+  </table>
+</div>

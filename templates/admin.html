@@ -1,0 +1,396 @@
+{% extends 'base.html' %}
+
+{% block title %} Admin & Settings {% endblock %}
+
+{% block notify %}
+<!-- Success -->
+  {% if (alert['type'] == 'success') %}
+  <div class="container">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Success.</strong> {{ alert['text'] }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% elif (alert['type'] == 'error') %} 
+  <div class="container">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Error!</strong> {{ alert['text'] }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% elif (alert['type'] == 'warning') %} 
+  <div class="container">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Warning!</strong> {{ alert['text'] }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% endif %}
+{% endblock %}
+
+{% block content %}  
+<div class="container">
+
+<!-- Security Settings -->
+
+<div class="card shadow">
+	<div class="card-header bg-info">
+		<div class="row">
+			<div class="col justify-content-md-start">
+				<i class="fas fa-user-shield"></i>&nbsp; Security Settings
+			</div>
+			<div class="col justify-content-md-end">
+				<div class="form-check form-switch float-md-end">
+					<input class="form-check-input" type="checkbox" role="switch" id="enable_security" {% if settings['misc']['password'] == True %}checked{% endif %}> 
+					<label class="form-check-label" for="enable_security">Enable</label>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="card-body">
+		<div class="row">
+		{% for user in secrets %}
+			<div class="col-6">
+				<div class="card shadow">
+					<div class="card-header bg-info text-center">
+						<h1><i class="far fa-user"></i></h1>
+						<h5><br>{{ user['username'] }}</h5>
+					</div>
+					<div class="card-footer text-center"> 
+						<button type="button" class="btn btn-danger btn-lg" data-bs-toggle="modal" data-bs-target="#md-{{ user['id'] }}">
+							<i class="far fa-trash-alt"></i>
+						</button>
+						<!-- Modal Delete User -->
+						<form name="deluser" action="/admin" method="POST">
+						<div class="modal fade" id="md-{{ user['id'] }}" tabindex="-1" aria-labelledby="delUserModal" aria-hidden="true">
+							<div class="modal-dialog modal-dialog-centered">
+							<div class="modal-content">
+								<div class="modal-header">
+								<h5 class="modal-title" id="delUserModal">Are you sure?</h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+								</div>
+								<div class="modal-body">
+								Do you really want to delete {{ user['name'] }}?
+								</div>
+								<div class="modal-footer">
+								<button type="button" class="btn btn-success" data-bs-dismiss="modal">No, nevermind.</button>
+								<button type="submit" class="btn btn-danger" id="del_user" name="del_user" value="{{ user['id'] }}" formnovalidate="formnovalidate">Yes, Delete It.</button>
+								</div>
+							</div>
+							</div>
+						</div>
+						</form>
+						<!-- End Modal -->
+					</div>
+				</div><br>
+			</div>
+		{% endfor %}
+		<div class="col-6">
+			<div class="card shadow">
+					<button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#md-add-user">
+						<h1>
+							<br>
+							<i class="fas fa-plus-circle"></i>
+							<br>
+						</h1>
+						Add User<br><br>
+					</button>
+					<!-- Modal Add User -->
+					<form name="adduser" action="/admin" method="POST">
+					<div class="modal fade" id="md-add-user" tabindex="-1" aria-labelledby="addUserModal" aria-hidden="true">
+						<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<div class="modal-header">
+							<h5 class="modal-title" id="addUserModal">Add User Information</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<div class="modal-body">
+								<i>Each user can be assigned a unique passcode.<br>Passcodes must be numeric only, and at least four (4) digits long.</i>
+								<br><br>
+								<div class="input-group mb-3">
+									<span class="input-group-text" id="username-addon">Username</span>
+									<input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="username-addon" id="username" name="username" required="required">
+								</div>
+								<div class="input-group mb-3">
+									<span class="input-group-text" id="password-addon">Passcode</span>
+									<input type="password" class="form-control" aria-label="Password" aria-describedby="password-addon" inputmode="numeric" minlength="4" pattern="[0-9]*" id="password" name="password" required="required">
+								</div>
+								<div class="input-group mb-3">
+									<span class="input-group-text" id="cpassword-addon">Confirm Passcode</span>
+									<input type="password" class="form-control" aria-label="ConfirmPassword" aria-describedby="cpassword-addon" inputmode="numeric" minlength="4" pattern="[0-9]*" id="confirm_password" name="confirm_password" required="required" oninput="check(this)">
+									<script language='javascript' type='text/javascript'>
+										function check(input) {
+											if (input.value != document.getElementById('password').value) {
+												input.setCustomValidity('Passcodes Must be Matching.');
+											} else {
+												// input is valid -- reset the error message
+												input.setCustomValidity('');
+											}
+										}
+									</script>
+									<!-- Borrowed from user Faisal @ https://stackoverflow.com/questions/9142527/can-you-require-two-form-fields-to-match-with-html5 -->
+								</div>
+							</div>
+							<div class="modal-footer">
+							<button type="button" class="btn btn-warning" data-bs-dismiss="modal">Cancel</button>
+							<button type="submit" class="btn btn-success" id="add_user" name="add_user" value="true">Save</button>
+							</div>
+						</div>
+						</div>
+					</div>
+					</form>
+					<!-- End Modal -->
+				</div>
+		</div>
+	</div>
+	</div>
+</div>
+<br>
+<!-- Security Settings End -->
+
+<!-- API Settings -->
+<div class="card shadow">
+	<div class="card-header bg-info">
+		<div class="row">
+			<div class="col justify-content-md-start">
+				<i class="fas fa-key"></i>&nbsp; API Settings
+			</div>
+			<div class="col justify-content-md-end">
+				<div class="form-check form-switch float-md-end">
+					<input class="form-check-input" type="checkbox" role="switch" id="enable_api" {% if settings['api_config']['enable'] == True %}checked{% endif %}> 
+					<label class="form-check-label" for="enable_security">Enable</label>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="card-body">
+		<i>API key's must be used to access the API.  A key can be generated here.</i>
+		<div class="input-group">
+			<input type="text" class="form-control" value="{{ settings['api_config']['apikey'] }}" id="apikey" aria-label="API Key" readonly="readonly">
+		    <button class="btn btn-outline-primary" type="button" id="copy_key"><i class="far fa-clipboard"></i> Copy</button>
+			<button class="btn btn-success" type="button" id="gen_api">Generate New Key</button>
+		</div>
+		<i><a href="/haexample" target="blank">Show example Home Assistant configuration YAML. </a> (Opens in a new window/tab)</i>
+	</div>
+</div>
+<br>
+<!-- API Settings End -->
+
+<!-- Administration Functions Card -->
+<div class="card shadow">
+    <div class="card-header bg-danger">
+        <i class="fas fa-power-off"></i>&nbsp; System Power
+    </div>
+    <div class="card-body">
+            <!-- Reboot -->
+            <form name="input" action="/admin/reboot">
+                <!-- Button trigger modal -->
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-outline-warning btn-block shadow" data-bs-toggle="modal" data-bs-target="#rebootModal">
+                        Reboot System
+                    </button>
+                </div>
+                <!-- Reboot Modal -->
+                <div class="modal fade" id="rebootModal" tabindex="-1" aria-labelledby="rebootModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="rebootModalLabel">Reboot</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you would like to reboot the system?
+                                <br><i>Any unsaved data may be lost.</i></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary" name="reboot" value="True">Confirm</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Reboot Modal End -->
+
+            </form>
+
+            <br>
+            <!-- Shutdown -->
+            <form name="input" action="/admin/shutdown">
+                <!-- Button trigger modal -->
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-outline-danger btn-block shadow" data-bs-toggle="modal" data-bs-target="#shutdownModal">
+                        Shutdown System
+                    </button>
+                </div>
+                <!-- Shutdown Modal -->
+                <div class="modal fade" id="shutdownModal" tabindex="-1" aria-labelledby="shutdownModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="shutdownModalLabel">Shutdown</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you would like to shutdown the system?
+                                <br><i>Any unsaved data may be lost.  System must be manually started after a shutdown.</i></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary" name="shutdown" value="True">Confirm</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+<br>
+
+
+<!-- System Information Card -->
+<div class="card shadow">
+    <div class="card-header bg-info">
+        <i class="fas fa-info-circle"></i>&nbsp; System Information
+    </div>
+    <div class="card-body">
+        <b>CPU Info</b><br>
+        {% for line in cpuinfo %}
+        {{ line }}<br>
+        {% endfor %}
+    </div>
+</div>
+<br>
+
+<!-- Uptime Card -->
+<div class="card shadow">
+    <div class="card-header bg-info">
+        <i class="far fa-arrow-alt-circle-up"></i>&nbsp; Uptime
+    </div>
+    <div class="card-body">{{ uptime }}</div>
+</div>
+<br>
+
+
+<!-- Attributions and Credits -->
+<div class="card shadow">
+    <div class="card-header bg-info">
+        <i class="fas fa-bullhorn"></i>&nbsp; Atributions & Credits
+    </div>
+    <div class="card card-body">
+        <p>Web Application created by <a href="https://github.com/nebhead" target="blank">Ben Parmeter</a>, copyright 2021. Check out my other projects on <a href="https://github.com/nebhead" target="blank">GitHub.</a></p>
+        <p><i>If you enjoy this software and feel the need to donate a cup of coffee, a frosty beer or a bottle of wine to the developer you can click <a href="https://paypal.me/benparmeter" target="blank">here.</a></i></p>
+        <p><i>Of course, none of this project would be available without the wonderful and amazing folks below... </i></p><br>
+        <ul class="list-group">
+            <li class="list-group-item"><b>Bootstrap</b> - WebUI Based on Bootstrap 5.  Bootstrap is released under the MIT license and is copyright 2018 Twitter. (<a href="http://getbootstrap.com" target="blank">getbootstrap.com</a>)</li>
+            <li class="list-group-item"><b>JQuery</b> - Required by Bootstrap. Copyright JS Foundation and other contributors. Released under MIT license. (<a href="https://jquery.org/license/" target="blank">jquery.org/license</a>)</li>
+            <li class="list-group-item"><b>Popper</b> - Required by Bootstrap. Copyright 2016, 2018 FEDERICO ZIVOLO & CONTRIBUTORS. Released under MIT license. (<a href="https://popper.js.org/" target="blank">popper.js.org</a>)</li>
+            <li class="list-group-item"><b>FontAwesome</b> - Amazing FREE Icons that I use throughout this project.  Copyright Font Awesome.  Released under the Font Awesome Free License. (<a href="https://fontawesome.com/" target="blank">fontawesome.com</a>)(<a href="https://github.com/FortAwesome/Font-Awesome" target="blank">github.com</a>)</li>
+            <li class="list-group-item"><b>BootSwatch</b> - Bootstrap CSS styling.  Copyright 2012-2021 Thomas Park.  Licensed under MIT.  (<a href="https://bootswatch.com/" target="blank">https://bootswatch.com/</a>)</li>
+        </ul>
+    </div>
+</div>
+
+</div> <!-- End of Container -->
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$('#enable_security').change(function() {
+	if ($('#enable_security').prop('checked')) {
+		//console.log('Enabled!')
+		req = $.ajax({
+			url : '/sec',
+			type : 'POST',
+			data : { enable_security : true }
+		});
+		req.done(function(data) {
+			if(data['result'] != 'success') {
+				$('#enable_security').prop('checked', false);
+				alert('Failed to enable security!  Ensure you have at least one user defined.');
+			} else {
+				$('#logout').show();
+			};
+		});
+	} else {
+		//console.log('Disabled!')
+		req = $.ajax({
+			url : '/sec',
+			type : 'POST',
+			data : { enable_security : false }
+		});
+		req.done(function(data) {
+			if(data['result'] != 'success') {
+				$('#enable_security').prop('checked', true);
+				alert('Failed to disable security!');
+			} else {
+				$('#logout').hide();
+			};
+
+		});
+	};
+})
+</script>
+
+<script>
+	$('#enable_api').change(function() {
+		if ($('#enable_api').prop('checked')) {
+			//console.log('Enabled!')
+			req = $.ajax({
+				url : '/sec',
+				type : 'POST',
+				data : { enable_api : true }
+			});
+			req.done(function(data) {
+				if(data['result'] != 'success') {
+					$('#enable_api').prop('checked', false);
+					alert('Failed to enable API!');
+				} else {
+					var apikey = data['apikey'];
+					$('#apikey').val(apikey);
+				};
+			});
+		} else {
+			//console.log('Disabled!')
+			req = $.ajax({
+				url : '/sec',
+				type : 'POST',
+				data : { enable_api : false }
+			});
+			req.done(function(data) {
+				if(data['result'] != 'success') {
+					$('#enable_api').prop('checked', true);
+					alert('Failed to disable security!');
+				};
+			});
+		};
+	})
+</script>
+
+<script>
+	$('#gen_api').click(function() {
+		req = $.ajax({
+			url : '/sec',
+			type : 'POST',
+			data : { gen_api : true }
+		});
+		req.done(function(data) {
+			if(data['result'] != 'success') {
+				alert('Failed to generate API Key!');
+			} else {
+				var apikey = data['apikey'];
+				$('#apikey').val(apikey);
+			};
+		});
+	});
+</script>
+
+<script>
+	$('#copy_key').click(function() {
+		$('#apikey').select();
+		document.execCommand("copy");
+	});
+</script>
+
+{% endblock %}

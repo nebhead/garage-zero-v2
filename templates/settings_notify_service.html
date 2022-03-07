@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% from "_macro_services.html" import render_email, render_proto, render_ifttt, render_pushover, render_pushbullet %}
+
+{% block title %} Add/Edit Notification Service {% endblock %}
+
+{% block notify %}
+<!-- Success -->
+  {% if (alert['type'] == 'success') %}
+  <div class="container">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Success.</strong> {{ alert['text'] }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% elif (alert['type'] == 'error') %} 
+  <div class="container">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Error!</strong> {{ alert['text'] }} <br>
+		<a href="/settings">Click here to go back...</a>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% elif (alert['type'] == 'warning') %} 
+  <div class="container">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Warning!</strong> {{ alert['text'] }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% endif %}
+{% endblock %}
+
+{% block content %}  
+<div class="container">
+
+<form name="addeditnotifyservice" action="/addeditnotify" method="POST">
+{{ form.csrf_token }}
+
+<!-- Notify Settings Card -->
+<div class="card shadow">
+	<div class="card-header bg-primary">
+		<i class="far fa-bell"></i>&nbsp; 
+		{% if form.id.data == '' %} Add Notification Service 
+		{% else %} Edit Notification Service {% endif %}
+	</div>
+	<div class="card-body">
+
+	{% if form.ntype.data == 'email' %} 
+
+	{{ render_email(form) }}
+
+	{% elif form.ntype.data == 'ifttt' %} 
+
+	{{ render_ifttt(form) }}
+
+	{% elif form.ntype.data == 'pushover' %} 
+
+	{{ render_pushover(form) }}
+
+	{% elif form.ntype.data == 'pushbullet' %} 
+
+	{{ render_pushbullet(form) }}
+
+	{% elif form.ntype.data == 'proto' %} 
+
+	{{ render_proto(form) }}
+
+	{% else %} 
+	
+	<div class="alert alert-danger alert-dismissible fade show" role="alert">
+		<i class="fas fa-check-circle"></i>&nbsp; <strong>Error!</strong> Invalid Form Type! <br>
+		<a href="/settings">Click here to go back...</a>
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+
+	{% endif %}
+		
+	</div>
+	<!-- End of Notification Settings Card Body-->
+	<div class="card-footer">
+		{% if form.id.data == '' %} 
+		<button type="submit" class="btn btn-primary" id="add_service" name="add_service" value="{{ form.ntype.data }}">
+			Add Service
+		</button>
+		{% else %}
+		<button type="submit" class="btn btn-primary" id="edit_service" name="edit_service" value="{{ form.id.data }}">
+			Save Changes
+		</button>
+		<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#md-delete-service">
+			Delete Service
+		</button>
+		{% endif %}
+		<a href="/settings" class="btn btn-warning">Cancel</a>
+	</div>
+</div> 
+<!-- End of Notification Settings Card -->
+</form>
+
+<form name="delete_service" action="/settings" method="POST">
+<!-- Modal Delete Notify Service -->
+<div class="modal fade" id="md-delete-service" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+	<div class="modal-content">
+		<div class="modal-header">
+		<h5 class="modal-title" id="exampleModalLabel">Are you sure?</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+		Do you really want to delete {{ form.sname.data }}?
+		</div>
+		<div class="modal-footer">
+		<button type="button" class="btn btn-success" data-bs-dismiss="modal">No, nevermind.</button>
+		<button type="submit" class="btn btn-danger" id="del_service" name="del_service" value="{{ form.id.data }}" formnovalidate="formnovalidate">Yes, Delete It.</button>
+		</div>
+	</div>
+	</div>
+</div>
+<!-- End Modal -->
+</form>
+
+<br><br>
+
+</div> 
+<!-- End of Container -->
+
+{% endblock %}
+{% block scripts %} 
+<script>
+</script>
+{% endblock %}

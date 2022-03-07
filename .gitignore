@@ -1,0 +1,14 @@
+
+__pycache__/
+
+gh-pages/
+
+local/
+
+*.json
+
+*.code-workspace
+
+*.log
+
+templates/backup/

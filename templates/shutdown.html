@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% if "shutdown" in action %}
+<meta http-equiv="refresh" content="10;url=/" />
+{% elif "reboot" in action %}
+<meta http-equiv="refresh" content="50;url=/" />
+{% else %}
+<meta http-equiv="refresh" content="3;url=/" />
+{% endif %}
+
+{% endblock %}
+
+{% block title %} Garage Zero {% endblock %}
+
+{% block content %}
+    <div class="container theme-showcase" role="main">
+
+      <br>
+      {% if "shutdown" in action %}
+        <center>
+          <H1>Shutting Down...</H1><br>
+          See you again real soon!
+        </center>
+      {% elif "reboot" in action %}
+        <center>
+          <H1>Rebooting...</H1><br>
+          Hang in there, this could take a few minutes.
+        </center>
+      {% else %}
+        <center><H1>Unspecified Action</H1></center>
+      {% endif %}
+      <br>
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;"></div>
+      </div>
+    </div>
+{% endblock %}

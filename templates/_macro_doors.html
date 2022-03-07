@@ -1,0 +1,66 @@
+{% macro render_hidden(field) %}
+	{{ field(class_='form-control', **kwargs)|safe }}
+{% endmacro %}
+
+{% macro render_stringfield(field) %}
+
+	<div class="input-group mb-3">
+		<span class="input-group-text" id="{{ field.name }}">{{ field.label.text }}</span>
+		{{ field(class_='form-control', **kwargs)|safe }}
+			{% for error in field.errors %}
+			<br><br><small style="color:red;">{{ error }}</small>
+			{% endfor %}
+	</div>
+
+{% endmacro %}
+
+{% macro render_integerfield(field) %}
+
+	<div class="input-group mb-3">
+		<span class="input-group-text" id="{{ field.name }}">{{ field.label.text }}</span>
+		{{ field(class_='form-control', **kwargs)|safe }}
+			{% for error in field.errors %}
+			<br><br><small style="color:red;">{{ error }}</small>
+			{% endfor %}
+	</div>
+
+{% endmacro %}
+
+{% macro render_textfield(field) %} 
+
+<div class="input-group mb-3">
+	<span class="input-group-text" id="{{ field.name }}">{{ field.label.text }}</span>
+	{{ field(class_='form-control', **kwargs)|safe }}
+		{% for error in field.errors %}
+		<br><br><small style="color:red;">{{ error }}</small>
+		{% endfor %}
+</div>
+
+{% endmacro %} 
+
+{% macro render_checkfield(field) %} 
+
+<div class="form-check">
+	{{ field(class_='form-check-input', **kwargs)|safe }}
+	<label class="form-check-label" for="{{ field.id }}">
+	{{ field.label.text }}
+	</label>
+</div>
+
+{% endmacro %} 
+
+{% macro render_selectfieldbs(field) %} 
+
+<div class="input-group mb-3">
+	<span class="input-group-text" id="{{ field.name }}">{{ field.label.text }}</span>
+	{{ field(class_='form-control', **kwargs)|safe }}
+		{% for error in field.errors %}
+		<br><br><small style="color:red;">{{ error }}</small>
+		{% endfor %}
+</div>
+
+{% endmacro %} 
+
+{% macro render_selectfield(field) %} 
+{{ field }}
+{% endmacro %}

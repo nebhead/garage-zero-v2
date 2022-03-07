@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block title %} Settings {% endblock %}
+
+{% block notify %}
+<!-- Success -->
+  {% if (alert['type'] == 'success') %}
+  <div class="container">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Success.</strong> {{ alert['text'] }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% elif (alert['type'] == 'error') %} 
+  <div class="container">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Error!</strong> {{ alert['text'] }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% elif (alert['type'] == 'warning') %} 
+  <div class="container">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Warning!</strong> {{ alert['text'] }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% endif %}
+{% endblock %}
+
+{% block content %}  
+<div class="container">
+
+<!-- Theme Card -->
+<form name="theme" action="/settings" method="POST">
+<div class="card shadow">
+    <div class="card-header bg-primary">
+        <i class="fas fa-palette"></i>&nbsp; Theme Settings
+    </div>
+    <div class="card-body">
+        <div class="form-group">
+            <label for="sel1">Select a Theme:</label>
+            <select class="form-select" id="theme" name="theme" aria-label="theme-select">
+                {% for theme in settings['misc']['themelist'] %}
+              <option value="{{ theme['name'] }}" {% if settings['misc']['theme'] == theme['filename'] %}selected{% endif %}>{{ theme['name'] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Set Theme</button>
+    </div>
+</div>
+</form><br><br>
+
+<!-- Notify Settings Card -->
+<div class="card shadow">
+	<div class="card-header bg-primary">
+		<i class="far fa-bell"></i>&nbsp; Notification Settings
+	</div>
+	<div class="card-body">
+		<!-- Public URL Card -->
+		<form name="notifyservices" action="/settings" method="POST">
+		<div class="card shadow">
+			<div class="card-header bg-info">
+				<i class="fas fa-globe"></i>&nbsp; Public / Local URL
+			</div>
+			<div class="card-body">
+				The Public / Local URL can be used by some notification services to provide a convenient URL link to your garage door dashboard.
+				<br><br> 
+				<div class="input-group mb-3">
+					<span class="input-group-text" id="public_url_desc">Public / Local URL:</span>
+					<input type="text" class="form-control" id="public_url" name="public_url" aria-describedby="public_url_desc" value="{{ settings['misc']['public_url'] }}">
+				</div>
+			</div>
+			<div class="card-footer">
+				<button type="submit" class="btn btn-primary">Save URL</button>
+			</div>
+		</div>
+		</form>
+		<br><br>
+
+		<!-- Current Notification Services Card(s) -->
+		<form name="notify_service_actions" action="/settings" method="POST">
+		<div class="card shadow">
+			<div class="card-header bg-info">
+				<i class="far fa-comment-alt"></i>&nbsp; Notify Services
+			</div>
+			<div class="card-body">
+				<table class="table">
+					<thead>
+					<tr>
+						<th scope="col">Actions</th>
+						<th scope="col">Notification Service Name</th>
+						<th scope="col">Type</th>
+					</tr>
+					</thead>
+					<tbody>
+					{% for notify_service in settings['notify'] %}
+					<tr>
+						<td>
+							
+							<button type="submit" class="btn btn-primary" id="edit_service" name="edit_service" value="{{ notify_service['id'] }}">
+								<i class="far fa-edit"></i>
+							</button>
+							<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#md-{{ notify_service['id'] }}">
+								<i class="far fa-trash-alt"></i>
+							</button>
+						</td>
+						<td>{{ notify_service['name'] }}</td>
+						<td>
+							{% if notify_service['type'] == 'email' %} E-Mail
+							{% elif notify_service['type'] == 'ifttt' %} IFTTT
+							{% elif notify_service['type'] == 'pushover' %} Pushover
+							{% elif notify_service['type'] == 'pushbullet' %} PushBullet
+							{% elif notify_service['type'] == 'proto' %} Test
+							{% else %} Unknown
+							{% endif %}
+						</td>
+					</tr>
+					{% endfor %}
+					<tr>
+						<td> 
+							<button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#md-add-service">
+								<i class="fas fa-plus"></i> Add Service
+							</button>
+						</td>
+						<td></td>
+						<td></td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+			<!-- End Notify Service Card Body -->
+		</div>
+		<!-- End Notify Service Card -->
+		<br>
+
+		<!-- Create Modals for Delete Notify Service Action -->
+		{% for notify_service in settings['notify'] %}
+		<!-- Modal Delete Notify Service -->
+		<div class="modal fade" id="md-{{ notify_service['id'] }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Are you sure?</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+				Do you really want to delete {{ notify_service['name'] }}?
+				</div>
+				<div class="modal-footer">
+				<button type="button" class="btn btn-success" data-bs-dismiss="modal">No, nevermind.</button>
+				<button type="submit" class="btn btn-danger" id="del_service" name="del_service" value="{{ notify_service['id'] }}" formnovalidate="formnovalidate">Yes, Delete It.</button>
+				</div>
+			</div>
+			</div>
+		</div>
+		<!-- End Modal -->
+		{% endfor %}
+		</form>
+		<form name="notify_service_add_modal" action="/settings" method="POST">
+		<!-- Modal Add Notify Service -->
+		<div class="modal fade" id="md-add-service" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Add Service</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="sel1">Select a Notification Service Type from the dropdown:</label>
+						<select class="form-select" id="notify_service" name="add_service" aria-label="notify-select">
+							<option value="none">Pick a Service to Add</option>
+							{% for notify_type in settings['misc']['notify_services'] %}
+							<option value="{{ notify_type['type'] }}">{{ notify_type['name'] }}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+				<div class="modal-footer">
+				<button type="button" class="btn btn-warning" data-bs-dismiss="modal">No, nevermind.</button>
+				<button type="submit" class="btn btn-success" id="add_service" formnovalidate="formnovalidate">Add It.</button>
+				</div>
+			</div>
+			</div>
+		</div>
+		<!-- End Modal -->
+	</form>
+
+	</div>
+	<!-- End of Notification Settings Card Body-->
+</div> 
+<!-- End of Notification Settings Card -->
+<br><br>
+
+<!-- Door Settings Services Card -->
+<div class="card shadow">
+	<div class="card-header bg-primary">
+		<i class="fas fa-warehouse"></i>&nbsp; Door Settings
+	</div>
+	<div class="card-body">
+		<!-- Current Doors -->
+		<form name="door_actions" action="/settings" method="POST">
+			<table class="table">
+				<thead>
+					<tr>
+						<th scope="col">Actions</th>
+						<th scope="col">Door Name</th>
+					</tr>
+				</thead>
+				<tbody>
+				{% for door in settings['doors'] %}
+					<tr>
+						<td>
+							<button type="submit" class="btn btn-primary" id="edit_door" name="edit_door" value="{{ door['id'] }}">
+								<i class="far fa-edit"></i>
+							</button>
+							<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#md-{{ door['id'] }}">
+								<i class="far fa-trash-alt"></i>
+							</button>
+						</td>
+						<td>{{ door['name'] }}</td>
+					</tr>
+				{% endfor %}
+					<tr>
+						<td> 
+							<button type="submit" class="btn btn-success" id="add_door" name="add_door" value="true">
+								<i class="fas fa-plus"></i> Add Door
+							</button>
+						</td>
+						<td></td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+
+					<!-- Create Modals for Delete Notify Service Action -->
+					{% for door in settings['doors'] %}
+					<!-- Modal Delete Notify Service -->
+					<div class="modal fade" id="md-{{ door['id'] }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+						<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content">
+							<div class="modal-header">
+							<h5 class="modal-title" id="exampleModalLabel">Are you sure?</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<div class="modal-body">
+							Do you really want to delete {{ door['name'] }}?
+							</div>
+							<div class="modal-footer">
+							<button type="button" class="btn btn-success" data-bs-dismiss="modal">No, nevermind.</button>
+							<button type="submit" class="btn btn-danger" id="del_door" name="del_door" value="{{ door['id'] }}" formnovalidate="formnovalidate">Yes, Delete It.</button>
+							</div>
+						</div>
+						</div>
+					</div>
+					<!-- End Modal -->
+					{% endfor %}
+				</form>
+			
+	</div>
+	<!-- End of Door Settings Services Card -->
+</div> 
+<!-- End of Container -->
+
+{% endblock %}
+{% block scripts %} 
+<script>
+</script>
+{% endblock %}

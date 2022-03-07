@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %} Garage Zero Login {% endblock %}
+
+{% block notify %}
+<!-- Success -->
+  {% if (alert['type'] == 'success') %}
+  <br>
+  <div class="container">
+	<div class="row justify-content-center">
+		<div class="col-8">
+			<div class="alert alert-success alert-dismissible fade show" role="alert">
+				<i class="fas fa-check-circle"></i>&nbsp; <strong>Success.</strong> {{ alert['text'] }}
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+  		</div>
+	</div>
+  </div>
+  {% elif (alert['type'] == 'error') %} 
+  <br> 
+  <div class="container">
+	<div class="row justify-content-center">
+		<div class="col-8">
+			<div class="alert alert-danger alert-dismissible fade show" role="alert">
+				<i class="fas fa-check-circle"></i>&nbsp; <strong>Error!</strong> {{ alert['text'] }}
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+		</div>
+	</div>
+  </div>
+  {% elif (alert['type'] == 'warning') %} 
+  <br> 
+  <div class="container">
+	<div class="row justify-content-center">
+		<div class="col-8">
+			<div class="alert alert-warning alert-dismissible fade show" role="alert">
+				<i class="fas fa-check-circle"></i>&nbsp; <strong>Warning!</strong> {{ alert['text'] }}
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+		</div>
+	</div>
+  </div>
+  {% endif %}
+{% endblock %}
+
+{% block navbar %} {% endblock %}
+
+{% block content %}  
+<div class="container">
+
+	<form name="login" method="POST" action="/login">
+	<div class="row justify-content-center">
+		<div class="col-8">
+			<div class="card shadow">
+				<div class="card-header bg-primary text-center">
+					<br>
+					<img src="{{ url_for('static', filename='img/launcher-icon-3x.png') }}" alt="GarageZero"><br><br>
+					<H3>Welcome!</H3>
+				</div>
+				<div class="card-body text-center">
+					<H6>Enter Passcode</H6>
+					<input type="password" class="form-control text-center" pattern="[0-9]*" inputmode="numeric" id="password" name="password"><br>
+				</div>
+				<div class="card-footer bg-secondary text-center">
+					<button type="submit" class="btn btn-primary">Login</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	</form>
+</div> 
+<!-- End of Container -->
+{% endblock %}
+
+{% block scripts %} 
+<script>
+</script>
+{% endblock %}

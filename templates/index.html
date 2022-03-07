@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %} Dashboard {% endblock %}
+
+{% block content %} 
+<div class="container">
+	<!-- Door Status/Command Block -->
+	<div class="row justify-content-md-center">
+		{% for button in button_list %}
+		<div class="col">
+			<div class="card mx-auto" style="width: 18rem;">
+				<button type="button" class="btn btn-secondary disabled shadow" id="btn_{{ button['id'] }}">
+					<img src="{{ url_for('static', filename='img/doorclosed.png') }}" alt="Press to Open" width="144" height="144" id="btnimg_{{ button['id'] }}">
+				</button>
+    		</div><br>
+			<div class="card bg-secondary disabled shadow mx-auto" id="card_{{ button['id'] }}" style="width: 18rem;">
+				<div class="card-body text-center text-white">
+					<b>{{ button['name'] }}</b> <b id="text_{{ button['id'] }}">-- <i class="fas fa-lock"></i></b>
+				</div>
+			</div>
+			<br> <br>
+		</div> 
+		{% endfor %}
+	</div> 
+
+	<br>
+	<!-- Event History Block -->
+  <div class="row">
+    <div class="col">
+      <div class="card shadow">
+        <div class="card-header bg-info">
+			<i class="fas fa-history"></i>&nbsp;Event History (last 10 events)
+        </div>
+        <div class="card-body">
+          <div id="shortlog"></div>
+        </div>
+        <div class="card-footer">
+
+		<div class="row">
+			<div class="col justify-content-md-start">
+				<form name="listoptions" method="POST" action="/">
+					{% if settings['misc']['listorder'] == 'topdown' %}
+					<button class="btn btn-primary" type="submit" id="listorder" name="listorder" value="bottomup"><i class="fas fa-sort-amount-up-alt"></i> Sort</button>
+					{% else %}
+					<button class="btn btn-primary" type="submit" id="listorder" name="listorder" value="topdown"><i class="fas fa-sort-amount-down"></i> Sort</button>
+					{% endif %}
+					<div class="btn-group">
+					{% if settings['misc']['24htime'] %}
+					<button type="button" class="btn btn-primary">24h Time</button>
+					<button type="submit" class="btn btn-secondary" type="submit" id="24htime" name="24htime" value="false">12h Time</button>
+					{% else %}
+					<button type="submit" class="btn btn-secondary" type="submit" id="24htime" name="24htime" value="true">24h Time</button>
+					<button type="button" class="btn btn-primary">12h Time</button>
+					{% endif %}
+					</div>
+				</form>
+			</div>
+			<div class="col justify-content-md-end">
+				<div class="d-grid gap-2 d-md-flex justify-content-md-end">
+					<a class="btn btn-primary" href="/history" role="button">Full Event Logs</a>
+				</div>	
+			</div>
+		</div>
+        </div> <!-- End of Card Footer -->
+      </div> <!-- End of Card -->
+    </div> <!-- End of Col -->
+  </div> <!-- End of Row -->
+</div> <!-- End of Container -->
+{% endblock %}
+{% block scripts %}
+	<!-- JS for updating the door status from the server  -->
+	<script>
+		// Pass the URL Path for Images to doorstatus.js
+		var imgfolder = "{{ url_for('static', filename='img/') }}";
+    // Update of the log every 2 seconds
+    $(document).ready(function(){
+      $('#shortlog').load("/shortlog");
+      setInterval(function(){
+        $('#shortlog').load("/shortlog");
+      }, 2000);
+    });
+  </script>
+	<script src="{{ url_for('static', filename='js/doorstscmd.js') }}"></script>
+
+{% endblock %}

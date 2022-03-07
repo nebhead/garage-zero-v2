@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% from "_macro_doors.html" import render_hidden, render_stringfield, render_selectfieldbs, render_checkfield, render_integerfield, render_textfield %}
+
+{% block title %} Add/Edit Event {% endblock %}
+
+{% block notify %}
+<!-- Success -->
+  {% if (alert['type'] == 'success') %}
+  <div class="container">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Success.</strong> {{ alert['text'] }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% elif (alert['type'] == 'error') %} 
+  <div class="container">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Error!</strong> {{ alert['text'] }} <br>
+		<a href="/settings">Click here to go back...</a>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% elif (alert['type'] == 'warning') %} 
+  <div class="container">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Warning!</strong> {{ alert['text'] }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% endif %}
+{% endblock %}
+
+{% block content %}  
+<div class="container">
+
+<form name="addeditdoor" action="/addeditevent" method="POST">
+{{ eform.csrf_token }}
+
+<!-- Door Top Level Card -->
+<div class="card shadow">
+	<div class="card-header bg-primary">
+		<i class="fas fa-warehouse"></i>&nbsp;
+		{% if action == 'add_event' %} Add Event 
+		{% else %} Edit Event {% endif %}
+	</div>
+	<div class="card-body">
+		{{ render_hidden(eform.id) }}
+		<div class="card shadow">
+			<div class="card-header bg-info">
+				<strong>Basic Event Info{% if action != 'add_event' %}: {{ eform.event_type.data }} {% endif %}</strong>
+			</div>
+			<div class="card-body">
+				<i>These settings allow you to customize {% if action == 'add_event' %}the event type,{% endif %} the sensor being 
+					watched, the sensor level which will trigger this event, as well as the 
+					logtype. 
+				</i><br><br>
+				{% if action == 'add_event' %}
+				{{ render_selectfieldbs(eform.event_type) }}
+				{% else %}
+				<input id="event_type" name="event_type" type="hidden" value="{{ eform.event_type.data }}">
+				{% endif %}
+				{{ render_selectfieldbs(eform.sensor) }} 
+				{{ render_selectfieldbs(eform.sensorlevel) }} 
+				{{ render_selectfieldbs(eform.logtype) }} 
+			</div>
+		</div><br>
+		<div class="card shadow">
+			<div class="card-header bg-info">
+				<strong>Event Notification Settings</strong>
+			</div>
+			<div class="card-body">
+				<i>These settings allow you to customize what you should see in the
+					in notifications.  <strong>Title</strong> is used for the title of 
+					notification or e-mail.  <strong>Message</strong> is used for 
+					the body of the notification or e-mail.  Also select which notifications
+					should be sent for this event. 
+				</i><br><br>
+				{{ render_stringfield(eform.title) }} 
+				{{ render_textfield(eform.message) }} 
+				{{ render_selectfieldbs(eform.notifylist) }} 
+				<kbd>ctrl + click</kbd> <i>for multiple selections</i>
+			</div>
+		</div><br>
+		<div class="card shadow">
+			<div class="card-header bg-info">
+				<strong>Timer and Reminder Settings</strong>
+			</div>
+			<div class="card-body">
+				<i>If this event has some timer related events (and/or reminders), you can 
+					customize those settings here.  <strong>Start Timer</strong>, will start the timer running 
+					for this event.  <strong>Time Delay</strong> will specify the time (mins) to 
+					delay before sending a notificiation for this event.  This can be useful for 
+					an initial notification after the door has been open for a certain amount of time.  
+					<strong>Timer End Event</strong> allows you to specify an event that will end the 
+					timer, such as when the door is closed.  <strong>Reminder Event</strong> allows 
+					you to specify if you want to link to a reminder event, for example if you want 
+					continuous reminders every 30 minutes until the door is closed.  
+				</i><br><br>
+				{{ render_checkfield(eform.starttimer) }} <br>
+				{{ render_integerfield(eform.time) }} 
+				{{ render_selectfieldbs(eform.timerendevent) }} 
+				{{ render_selectfieldbs(eform.remindevent) }} 
+			</div>
+		</div><br>
+	</div> <!-- End of Card Body for Door Event -->
+
+	<div class="card-footer">
+		{% if action == 'add_event' %} 
+		<button type="submit" class="btn btn-primary" id="add_event" name="add_event" value="{{ eform.id.data }}">
+			Add Event
+		</button>
+		{% else %}
+		<button type="submit" class="btn btn-primary" id="edit_event" name="edit_event" value="{{ eform.event_type.data  + ':' + eform.id.data }}">
+			Save Changes
+		</button>
+		<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#md-delete-event">
+			Delete Event
+		</button>
+		{% endif %}
+		<a href="/settings" class="btn btn-warning">Cancel</a>
+	</div>
+</div> 
+<!-- End of Door Settings Card -->
+</form>
+{% if action != 'add_event' %} 
+<form name="delete_event" action="/addeditdoor" method="POST">
+<!-- Modal Delete Door -->
+<div class="modal fade" id="md-delete-event" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+	<div class="modal-content">
+		<div class="modal-header">
+		<h5 class="modal-title" id="exampleModalLabel">Are you sure?</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+		Do you really want to delete event "{{ eform.title.data }}"?
+		</div>
+		<div class="modal-footer">
+		{{ render_hidden(eform.id) }}
+		<button type="button" class="btn btn-success" data-bs-dismiss="modal">No, nevermind.</button>
+		<button type="submit" class="btn btn-danger" id="del_event" name="del_event" value="{{ eform.event_type.data + ':' + eform.id.data }}" formnovalidate="formnovalidate">Yes, Delete It.</button>
+		</div>
+	</div>
+	</div>
+</div>
+<!-- End Modal -->
+</form>
+{% endif %} 
+<br><br>
+
+</div> 
+<!-- End of Container -->
+
+{% endblock %}
+{% block scripts %} 
+<script>
+</script>
+{% endblock %}

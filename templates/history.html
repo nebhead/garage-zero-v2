@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %} Event History {% endblock %}
+
+{% block content %} 
+<div class="container theme-showcase" role="main">
+    <div class="row">
+        <div class="col">
+          <div class="card shadow">
+            <div class="card-header bg-info"><i class="fas fa-history"></i>&nbsp;Event History (Month)</div>
+            <div class="card-body">
+              
+              <form name="listoptions" method="POST" action="/history">
+                {% if settings['misc']['listorder'] == 'topdown' %}
+                <button class="btn btn-primary" type="submit" id="listorder" name="listorder" value="bottomup"><i class="fas fa-sort-amount-up-alt"></i> Sort</button>
+                {% else %}
+                <button class="btn btn-primary" type="submit" id="listorder" name="listorder" value="topdown"><i class="fas fa-sort-amount-down"></i> Sort</button>
+                {% endif %}
+
+                <div class="btn-group">
+                  {% if settings['misc']['24htime'] %}
+                  <button type="button" class="btn btn-primary">24h Time</button>
+                  <button type="submit" class="btn btn-secondary" type="submit" id="24htime" name="24htime" value="false">12h Time</button>
+                  {% else %}
+                  <button type="submit" class="btn btn-secondary" type="submit" id="24htime" name="24htime" value="true">24h Time</button>
+                  <button type="button" class="btn btn-primary">12h Time</button>
+                  {% endif %}
+                </div>
+
+              </form><br>
+
+              <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Event</th>
+						<th>Detail</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% if events > 0 %}
+                        {% if settings['misc']['listorder'] == 'bottomup' %}
+                          {% for row in range(events) %}
+							{% if "BUTTON" in door_history[events-1-row][2] %}
+								<tr class="table-success">
+							{% elif "OPENED" in door_history[events-1-row][2] %}
+								<tr class="table-warning">
+							{% elif "ERROR" in door_history[events-1-row][2] %}
+								<tr class="table-danger">
+							{% else %}
+								<tr>
+							{% endif %}
+                          {% for column in range(4) %}
+							<td> {{ door_history[events-1-row][column] }} </td>
+							{% endfor %}
+							</tr>
+                          {% endfor %}
+                        {% else %}
+                          {% for row in range(events) %}
+							{% if "BUTTON" in door_history[row][2] %}
+								<tr class="table-success">
+							{% elif "OPENED" in door_history[row][2] %}
+								<tr class="table-warning">
+							{% elif "ERROR" in door_history[row][2] %}
+								<tr class="table-danger">
+							{% else %}
+								<tr>
+							{% endif %}
+                          {% for column in range(4) %}
+							<td> {{ door_history[row][column] }} </td>
+							{% endfor %}
+							</tr>
+                          {% endfor %}
+                        {% endif %}
+                      {% else %}
+                        <tr> <td>No Data Yet.</td> <td></td> <td></td> </tr>
+                      {% endif %}
+                    </tbody>
+                </table>
+              </div>
+            </div> <!-- End of Card Body -->
+          </div> <!-- End of Card -->
+        </div> <!-- End of Col -->
+    </div> <!-- End of Row -->
+</div> <!-- End of Container -->
+{% endblock %}

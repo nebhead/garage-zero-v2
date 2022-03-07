@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+{% from "_macro_doors.html" import render_hidden, render_stringfield, render_selectfield, render_checkfield, render_integerfield %}
+
+{% block title %} Add/Edit Door Service {% endblock %}
+
+{% block notify %}
+<!-- Success -->
+  {% if (alert['type'] == 'success') %}
+  <div class="container">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Success.</strong> {{ alert['text'] }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% elif (alert['type'] == 'error') %} 
+  <div class="container">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Error!</strong> {{ alert['text'] }} <br>
+		<a href="/settings">Click here to go back...</a>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% elif (alert['type'] == 'warning') %} 
+  <div class="container">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>&nbsp; <strong>Warning!</strong> {{ alert['text'] }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  {% endif %}
+{% endblock %}
+
+{% block content %}  
+<div class="container">
+
+<form name="addeditdoor" action="/addeditdoor" method="POST">
+{{ dform.csrf_token }}
+
+<!-- Door Top Level Card -->
+<div class="card shadow">
+	<div class="card-header bg-primary">
+		<i class="fas fa-warehouse"></i>&nbsp;
+		{% if dform.id.data == 'new' %} Add Door 
+		{% else %} Edit Door {% endif %}
+	</div>
+	<div class="card-body">
+		{{ render_stringfield(dform.dname) }}
+
+		<div class="row">
+		<!-- List of Sensors / GPIOs -->
+		<div class="col">
+		<div class="card">
+			<div class="card-header bg-info">
+				<strong>Sensors</strong>
+			</div>
+			<div class="card-body">
+				{{ render_checkfield(dform.sensorlevel) }}
+				<table class="table">
+					<thead>
+					<tr>
+						<th scope="col">Actions</th>
+						<th scope="col">Sensor Name</th>
+						<th scope="col">GPIO</th>
+					</tr>
+					</thead>
+					<tbody id="inpins_table">
+					</tbody>
+					<tfoot>
+						<tr>
+							<td>
+								<button type="button" class="btn btn-success" id="check_inpin" data-bs-toggle="modal" data-bs-target="#md-add-inpin">
+									<i class="fas fa-plus"></i>
+								</button>
+							</td>
+							<td></td>
+							<td></td>
+						</tr>
+					</tfoot>
+				</table>
+				<!-- Modal Add Inpin -->
+				<div class="modal fade" id="md-add-inpin" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">Add Inpin</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+						Available Input Pin Types:
+						<select class="form-select" id="inpins_drop_down" name="add_inpin_selected">
+						</select>
+						</div>
+						<div class="modal-footer">
+						<button type="button" class="btn btn-success" data-bs-dismiss="modal">No, nevermind.</button>
+						<button type="button" class="btn btn-danger" id="add_inpin" data-bs-dismiss="modal">Add</button>
+						</div>
+					</div>
+					</div>
+				</div>
+				<!-- End Modal -->
+			</div> <!-- End of Card BODY-->
+		</div><br> <!-- End of Card -->
+	</div> <!-- End of Column A-->
+		
+		<!-- List of Buttons / GPIOs -->
+		<div class="col">
+		<div class="card">
+			<div class="card-header bg-info">
+				<strong>Buttons</strong>
+			</div>
+			<div class="card-body">
+				{{ render_checkfield(dform.triggerlevel) }}
+				<table class="table">
+					<thead>
+					<tr>
+						<th scope="col">Actions</th>
+						<th scope="col">Button Name</th>
+						<th scope="col">GPIO</th>
+					</tr>
+					</thead>
+					<tbody id="outpins_table"></tbody>
+					<tfoot>
+					<tr>
+						<td>
+							<button type="button" class="btn btn-success" id="check_outpin" data-bs-toggle="modal" data-bs-target="#md-add-outpin">
+								<i class="fas fa-plus"></i>
+							</button>
+						</td>
+						<td></td>
+						<td></td>
+					</tr>
+					</tfoot>
+				</table>
+				<!-- Modal Add Outpin -->
+				<div class="modal fade" id="md-add-outpin" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">Add Outpin</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+						Available Output Pin Types:
+						<select class="form-select" id="outpins_drop_down" name="add_outpin_selected">
+						</select>
+						</div>
+						<div class="modal-footer">
+						<button type="button" class="btn btn-success" data-bs-dismiss="modal">No, nevermind.</button>
+						<button type="button" class="btn btn-danger" id="add_outpin" data-bs-dismiss="modal">Add</button>
+						</div>
+					</div>
+					</div>
+				</div>
+				<!-- End Modal -->
+
+			</div> <!-- End of Card BODY -->
+		</div><br> <!-- End of Card -->
+		</div> <!-- End of Col B -->
+	</div> <!-- End of Row --> 
+</form>
+
+		<div class="card">
+			<div class="card-header bg-info">
+				<strong>Door Events</strong>
+			</div>
+			<div class="card-body">
+				<table class="table">
+					<thead>
+					<tr>
+						<th scope="col">Actions</th>
+						<th scope="col">Door Event</th>
+						<th scope="col">Log Type</th>
+					</tr>
+					</thead>
+					<tbody>
+					{% for event in elist %}
+					<tr>
+						<form name="addeditevent" action="/addeditdoor" method="POST">
+						<td>
+							<button type="submit" class="btn btn-primary" id="edit_event" name="edit_event" value="{{ event['name'] + ':' + dform.id.data }}">
+								<i class="far fa-edit"></i>
+							</button>
+							<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#md-{{ event['name'] }}">
+								<i class="far fa-trash-alt"></i>
+							</button>
+						</td>
+						<td>{{ event['title'] }}</td>
+						<td>{{ event['logtype'] }}</td>
+						<!-- Modal Delete Notify Service -->
+						<div class="modal fade" id="md-{{ event['name'] }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+							<div class="modal-dialog modal-dialog-centered">
+							<div class="modal-content">
+								<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLabel">Are you sure?</h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+								</div>
+								<div class="modal-body">
+								Do you really want to delete "{{ event['title'] }}"?
+								</div>
+								<div class="modal-footer">
+								<button type="button" class="btn btn-success" data-bs-dismiss="modal">No, nevermind.</button>
+								<button type="submit" class="btn btn-danger" id="del_event" name="del_event" value="{{ event['name'] + ':' + dform.id.data }}" formnovalidate="formnovalidate">Yes, Delete It.</button>
+								</div>
+							</div>
+							</div>
+						</div>
+						<!-- End Modal -->
+						</form>
+					</tr>
+					{% endfor %}
+					<tr>
+						<td>
+							<button type="submit" class="btn btn-success" id="add_event" name="add_event" value="{{ dform.id.data }}">
+								<i class="fas fa-plus"></i> Add Event
+							</button>
+						</td>
+						<td></td>
+						<td></td>
+					</tr>
+					</tbody>
+				</table>
+			</div> <!-- End of Card Body for all Door Events -->
+		</div> <!-- End of Card for all Door Events -->
+	
+		<!-- Create Modals for Delete Notify Service Action -->
+		{% for eform in eforms %}
+
+		{% endfor %}
+	
+
+	</div>
+	<!-- End of Door Top Level Card Body-->
+	<div class="card-footer">
+		{% if dform.id.data == 'new' %} 
+		<button type="submit" class="btn btn-primary" id="add_door" name="add_door" value="true">
+			Add Door
+		</button>
+		{% else %}
+		<button type="submit" class="btn btn-primary" id="edit_door" name="edit_door" value="{{ dform.id.data }}">
+			Save Changes
+		</button>
+		<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#md-delete-door">
+			Delete Door
+		</button>
+		{% endif %}
+		<a href="/settings" class="btn btn-warning">Cancel</a>
+	</div>
+</div> 
+<!-- End of Door Settings Card -->
+
+
+<form name="delete_door" action="/settings" method="POST">
+<!-- Modal Delete Door -->
+<div class="modal fade" id="md-delete-door" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+	<div class="modal-content">
+		<div class="modal-header">
+		<h5 class="modal-title" id="exampleModalLabel">Are you sure?</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+		Do you really want to delete {{ dform.dname.data }}?
+		</div>
+		<div class="modal-footer">
+		<button type="button" class="btn btn-success" data-bs-dismiss="modal">No, nevermind.</button>
+		<button type="submit" class="btn btn-danger" id="del_door" name="del_door" value="{{ dform.id.data }}" formnovalidate="formnovalidate">Yes, Delete It.</button>
+		</div>
+	</div>
+	</div>
+</div>
+<!-- End Modal -->
+</form>
+
+<br><br>
+
+</div> 
+<!-- End of Container -->
+
+{% endblock %}
+{% block scripts %} 
+<!-- JS for updating the door status from the server  -->
+<script>
+// Update of the log every 2 seconds
+$(document).ready(function(){
+	var data = {
+		action : "get_inpins",
+		id : "{{ dform.id.data }}"
+	};
+	$('#inpins_table').load("/pinsdata", data);
+	data = {
+		action : "get_outpins",
+		id : "{{ dform.id.data }}"
+	};
+	$('#outpins_table').load("/pinsdata", data);
+
+	$("#check_inpin").click(function(){
+		data = {
+			action : "get_avail_inpins", 
+			id : "{{ dform.id.data }}"
+		};
+		$('#inpins_drop_down').load("/pinsdata", data);
+  	});
+	
+	$("#check_outpin").click(function(){
+		data = {
+			action : "get_avail_outpins", 
+			id : "{{ dform.id.data }}", 
+		};
+		$('#outpins_drop_down').load("/pinsdata", data);
+  	});
+	
+	$("#add_inpin").click(function(){
+		var pintype = $("#inpins_drop_down").val() 
+		data = {
+			action : "add_inpin", 
+			id : "{{ dform.id.data }}",
+			pintype : pintype 
+		};
+		$('#inpins_table').load("/pinsdata", data);
+  	});  
+
+	$("#add_outpin").click(function(){
+		var pintype = $("#outpins_drop_down").val() 
+		data = {
+			action : "add_outpin", 
+			id : "{{ dform.id.data }}",
+			pintype : pintype 
+		};
+		$('#outpins_table').load("/pinsdata", data);
+  	});  
+
+});
+
+function delInpin(pintype){
+	data = {
+			action : "del_inpin", 
+			id : "{{ dform.id.data }}",
+			pintype : pintype 
+		};
+		$('#inpins_table').load("/pinsdata", data);
+}; 
+
+function delOutpin(pintype){
+	data = {
+			action : "del_outpin", 
+			id : "{{ dform.id.data }}",
+			pintype : pintype 
+		};
+		$('#outpins_table').load("/pinsdata", data);
+}; 
+
+</script>
+{% endblock %}

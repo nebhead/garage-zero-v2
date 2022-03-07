@@ -1,0 +1,32 @@
+{% from "_macro_doors.html" import render_selectfield %}
+	{% for outpin_form in dform.outpins %}
+	<tr>
+		<td>
+			<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#md-del-outpin-{{ outpin_form.outpin.data }}">
+				<i class="far fa-trash-alt"></i>
+			</button>
+			<!-- Modal Del Inpin -->
+			<div class="modal fade" id="md-del-outpin-{{ outpin_form.outpin.data }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Delete Output Pin? </h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						Are you sure you would like to delete {{ outpin_form.outpin.data }}?
+					</div>
+					<div class="modal-footer">
+					<button type="button" class="btn btn-success" data-bs-dismiss="modal">No, nevermind.</button>
+					<button type="button" class="btn btn-danger" id="del_outpin" onclick="delOutpin('{{ outpin_form.outpin.data }}')" data-bs-dismiss="modal">Yes, Delete it.</button>
+					</div>
+				</div>
+				</div>
+			</div>
+			<!-- End Modal -->
+		</td>
+		<td>{{ render_selectfield(outpin_form.outpin) }}</td>
+		<td>{{ render_selectfield(outpin_form.gpio_pin) }}</td>
+	</tr>
+	{% endfor %}
+

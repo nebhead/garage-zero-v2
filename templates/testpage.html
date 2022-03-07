@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %} Test {% endblock %}
+
+{% block content %} 
+<div class="container">
+ <h1><i class="fas fa-vial"></i>&nbsp;Welcome to the Test Page</h1><br>
+ <br>
+ {% for button in button_list %}
+	<div class="row">
+		<div class="col">
+			<div class="card shadow">
+				<div class="card-header bg-primary text-white">
+				Door {{ button['name'] }}
+				</div>
+				<div class="card-body">
+					<h5 class="card-title">Input/Sensors</h5>
+					{% for input in button['status'] %}
+						<br>
+						<button type="button" class="btn btn-primary shadow" id="btn_{{ button['id'] }}_{{ input }}">{{ input }}</button>
+					{% endfor %}
+					<br><br>
+					<h5 class="card-title">Output/Buttons</h5>
+					{% for output in button['command'] %}
+						<br>
+						<button type="button" class="btn btn-primary shadow" id="btn_{{ button['id'] }}_{{ output }}">{{ output }}</button>
+					{% endfor %}
+					<br>
+				</div>
+			</div><br>
+		</div>
+	</div> <!-- End of Row -->
+  {% endfor %}
+</div> <!-- End of Container -->
+{% endblock %}
+{% block scripts %}
+	<script src="{{ url_for('static', filename='js/testpage.js') }}"></script>
+{% endblock %}
