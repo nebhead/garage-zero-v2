@@ -20,7 +20,7 @@ else
         export SUDO="sudo"
         export SUDOE="sudo -E"
     else
-        echo "Please install sudo or run this as root."
+        echo "Please install sudo."
         exit 1
     fi
 fi
@@ -81,8 +81,9 @@ echo "**                                                                     **"
 echo "**      Cloning Garage-Zero v2 from GitHub...                          **"
 echo "**                                                                     **"
 echo "*************************************************************************"
-# TODO Uncomment for production
-git clone https://github.com/nebhead/garage-zero-v2
+cd /usr/local/bin
+# Clone the software
+$SUDO git clone https://github.com/nebhead/garage-zero-v2
 
 ### Setup nginx to proxy to gunicorn
 clear
@@ -92,7 +93,7 @@ echo "**      Configuring nginx...                                           **"
 echo "**                                                                     **"
 echo "*************************************************************************"
 # Move into garage-zero install directory
-cd ~/garage-zero-v2/auto-install
+cd /usr/local/bin/garage-zero-v2/auto-install/nginx
 
 # Delete default configuration
 $SUDO rm /etc/nginx/sites-enabled/default
@@ -116,7 +117,7 @@ echo "*************************************************************************"
 
 # Copy configuration files (control.conf, webapp.conf) to supervisor config directory
 # NOTE: If you used a different directory for garage-zero then make sure you edit the *.conf files appropriately
-$SUDO cd ~/garage-zero-v2/supervisor/
+$SUDO cd /usr/local/bin/garage-zero-v2/auto-install/supervisor/
 $SUDO cp *.conf /etc/supervisor/conf.d/
 
 SVISOR=$(whiptail --title "Would you like to enable the supervisor WebUI?" --radiolist "This allows you to check the status of the supervised processes via a web browser, and also allows those processes to be restarted directly from this interface. (Recommended)" 20 78 2 "ENABLE_SVISOR" "Enable the WebUI" ON "DISABLE_SVISOR" "Disable the WebUI" OFF 3>&1 1>&2 2>&3)
@@ -144,10 +145,10 @@ echo "**      Configuring Crontab for log backups...                         **"
 echo "**                                                                     **"
 echo "*************************************************************************"
 
-cd ~/garage-zero-v2
+cd /usr/local/bin/garage-zero-v2/auto-install
 $SUDO crontab -l > my-crontab
 # Add the following line...
-echo "0 0 1 * * cd /home/pi/garage-zero-v2/logs && sh backup.sh" >> my-crontab
+echo "0 0 1 * * cd /usr/local/bin/garage-zero-v2/logs && sh backup.sh" >> my-crontab
 $SUDO crontab my-crontab
 rm my-crontab
 
