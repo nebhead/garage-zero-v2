@@ -1,8 +1,7 @@
 from flask import Flask, request, render_template, make_response, redirect, jsonify, session, abort
 from flask_wtf import FlaskForm
 from flask_bcrypt import Bcrypt
-from wtforms import StringField, PasswordField, IntegerField, BooleanField, HiddenField, Form, FormField, FieldList, TextAreaField
-from wtforms.fields.core import SelectField, SelectMultipleField
+from wtforms import StringField, PasswordField, IntegerField, BooleanField, HiddenField, Form, FormField, FieldList, TextAreaField, SelectField, SelectMultipleField
 from wtforms.fields.simple import SubmitField
 from wtforms.validators import InputRequired, NumberRange
 import os
