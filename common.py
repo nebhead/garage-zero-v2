@@ -1,5 +1,6 @@
 import datetime
 import json
+import io
 
 def default_settings():
 	settings = {}
@@ -327,3 +328,15 @@ def write_secrets(secrets):
 	json_data_string = json.dumps(secrets, indent=2, sort_keys=True)
 	with open("secrets.json", 'w') as secrets_file:
 	    secrets_file.write(json_data_string)
+	    
+def is_raspberry_pi():
+	"""
+	Check if device is a Raspberry Pi
+	:return: True if Raspberry Pi. False otherwise
+	"""
+	try:
+		with io.open('/sys/firmware/devicetree/base/model', 'r') as m:
+			if 'raspberry pi' in m.read().lower(): return True
+	except Exception:
+		pass
+	return False

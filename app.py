@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, make_response, redirect, jsonify, session, abort
 from flask_wtf import FlaskForm
-from flask_bcrypt import Bcrypt
+#from flask_bcrypt import Bcrypt  # Disabling BCrypt for Raspberry Pi Compatibility 2/2023
 from wtforms import StringField, PasswordField, IntegerField, BooleanField, HiddenField, Form, FormField, FieldList, TextAreaField, SelectField, SelectMultipleField
 from wtforms.fields.simple import SubmitField
 from wtforms.validators import InputRequired, NumberRange
@@ -14,7 +14,7 @@ import secrets
 Globals
 """
 app = Flask(__name__)
-bcrypt = Bcrypt(app)
+#bcrypt = Bcrypt(app)  # Disabling BCrypt for Raspberry Pi Compatibility 2/2023
 app.config['SECRET_KEY'] = 'ADD_YOUR_SECRET_HERE'
 settings = read_settings()
 cmdsts = redis.Redis()
@@ -918,6 +918,9 @@ def admin(action=None):
 	if (request.method == 'POST'):
 		response = request.form
 		if('enable_security' in response):
+			pass
+			'''
+			# Bcrypt Issue on Raspberry Pi, enabling login security is disabled (2/2023)
 			if response['enable_security'] == 'true':
 				if len(secrets) > 0:
 					settings['misc']['password'] = True
@@ -938,6 +941,7 @@ def admin(action=None):
 				write_log(event, logtype='SETTINGS')
 				alert['type'] = 'success'
 				alert['text'] = event
+			'''
 		if('del_user' in response):
 			for index in range(len(secrets)):
 				if(secrets[index]['id'] == response['del_user']):
@@ -1317,5 +1321,7 @@ def build_event_form(door_id, event_type):
 	return(event_form)
 
 if __name__ == '__main__':
-	#app.run(host='0.0.0.0')
-	app.run(host='0.0.0.0', debug=True) # use ,debug=True for debug mode
+	if is_raspberry_pi():
+		app.run(host='0.0.0.0')  # Production Mode if on Raspberry Pi
+	else:
+		app.run(host='0.0.0.0', debug=True)  # Debug Mode on non-Raspberry Pi / Development System
