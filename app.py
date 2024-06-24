@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, make_response, redirect, jsonify, session, abort
 from flask_wtf import FlaskForm
-#from flask_bcrypt import Bcrypt  # Disabling BCrypt for Raspberry Pi Compatibility 2/2023
+from flask_bcrypt import Bcrypt  # Re-enabling bcrypt ror Raspberry Pi 6/24
 from wtforms import StringField, PasswordField, IntegerField, BooleanField, HiddenField, Form, FormField, FieldList, TextAreaField, SelectField, SelectMultipleField
 from wtforms.fields.simple import SubmitField
 from wtforms.validators import InputRequired, NumberRange
@@ -14,7 +14,7 @@ import secrets
 Globals
 """
 app = Flask(__name__)
-#bcrypt = Bcrypt(app)  # Disabling BCrypt for Raspberry Pi Compatibility 2/2023
+bcrypt = Bcrypt(app)  # Re-enabling bcrypt ror Raspberry Pi 6/24
 app.config['SECRET_KEY'] = 'ADD_YOUR_SECRET_HERE'
 settings = read_settings()
 cmdsts = redis.Redis()
@@ -332,18 +332,23 @@ def settings_base(action=None):
 		if(request.form['add_service'] == 'email'):
 			notify_service_form = EmailForm()
 			notify_service_form.ntype.data = 'email'
+			notify_service_form.id.data = ''  # Indicate that this is a new service
 		elif(request.form['add_service'] == 'ifttt'):
 			notify_service_form = IftttForm()
 			notify_service_form.ntype.data = 'ifttt'
+			notify_service_form.id.data = ''  # Indicate that this is a new service
 		elif(request.form['add_service'] == 'pushbullet'):
 			notify_service_form = PushbulletForm()
 			notify_service_form.ntype.data = 'pushbullet'
+			notify_service_form.id.data = ''  # Indicate that this is a new service
 		elif(request.form['add_service'] == 'pushover'):
 			notify_service_form = PushoverForm()
 			notify_service_form.ntype.data = 'pushover'
+			notify_service_form.id.data = ''  # Indicate that this is a new service
 		elif(request.form['add_service'] == 'proto'):
 			notify_service_form = ProtoNotifyForm()
 			notify_service_form.ntype.data = 'proto'
+			notify_service_form.id.data = ''  # Indicate that this is a new service
 		elif(request.form['add_service'] == 'none'):
 			return render_template('settings.html', alert=alert, settings=settings)
 		else:
@@ -411,21 +416,27 @@ def addeditnotify(action=None):
 		}
 
 	if('add_service' in request.form):
+		print(f'Add Service: {request.form["add_service"]}')
 		if(request.form['add_service'] == 'email'):
 			add_notify_form = EmailForm()
 			add_notify_form.ntype.data = 'email'
+			add_notify_form.id.data = ''  # Indicate that this is a new service
 		elif(request.form['add_service'] == 'ifttt'):
 			add_notify_form = IftttForm()
 			add_notify_form.ntype.data = 'ifttt'
+			add_notify_form.id.data = ''  # Indicate that this is a new service
 		elif(request.form['add_service'] == 'pushbullet'):
 			add_notify_form = PushbulletForm()
 			add_notify_form.ntype.data = 'pushbullet'
+			add_notify_form.id.data = ''  # Indicate that this is a new service
 		elif(request.form['add_service'] == 'pushover'):
 			add_notify_form = PushoverForm()
 			add_notify_form.ntype.data = 'pushover'
+			add_notify_form.id.data = ''  # Indicate that this is a new service
 		else:
 			add_notify_form = ProtoNotifyForm()
 			add_notify_form.ntype.data = 'proto'
+			add_notify_form.id.data = ''  # Indicate that this is a new service
 
 		if add_notify_form.validate():
 			if(add_notify_form.ntype.data == 'email'):
@@ -450,7 +461,7 @@ def addeditnotify(action=None):
 				add_notify_service['apikey'] = add_notify_form.apikey.data
 			else:
 				add_notify_service = default_proto_notify_obj_data()
-			
+
 			# Global Settings Apply
 			#add_notify_service['id'] = add_notify_form.id.data
 			add_notify_service['name'] = add_notify_form.sname.data

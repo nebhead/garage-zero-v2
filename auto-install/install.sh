@@ -72,7 +72,6 @@ echo "**      Installing Dependancies... (This could take several minutes)   **"
 echo "**                                                                     **"
 echo "*************************************************************************"
 $SUDO apt install python3-dev python3-pip python3-rpi.gpio nginx git gunicorn3 supervisor redis-server -y
-$SUDO pip3 install flask flask-bcrypt Flask-WTF redis pushbullet.py 
 
 # Grab project files
 clear
@@ -83,7 +82,41 @@ echo "**                                                                     **"
 echo "*************************************************************************"
 cd /usr/local/bin
 # Clone the software
-$SUDO git clone https://github.com/nebhead/garage-zero-v2
+$SUDO git clone --depth 1 https://github.com/nebhead/garage-zero-v2
+
+# Setup Python VENV & Install Python dependencies
+clear
+echo "*************************************************************************"
+echo "**                                                                     **"
+echo "**      Setting up Python VENV and Installing Modules...               **"
+echo "**            (This could take several minutes)                        **"
+echo "**                                                                     **"
+echo "*************************************************************************"
+echo ""
+echo " - Setting Up garagezero Group"
+cd /usr/local/bin
+$SUDO groupadd garagezero 
+$SUDO usermod -a -G garagezero $USER 
+$SUDO usermod -a -G garagezero root 
+# Change ownership to group=garagezero for all files/directories in garagezero 
+$SUDO chown -R $USER:garagezero garage-zero-v2 
+# Change ability for garagezero group to read/write/execute 
+$SUDO chmod -R 775 garage-zero-v2/
+
+echo " - Setting up VENV"
+# Setup VENV
+python -m venv --system-site-packages garage-zero-v2
+cd /usr/local/bin/garage-zero-v2
+source bin/activate 
+
+echo " - Installing module dependencies... "
+# Install module dependencies 
+python -m pip install "flask==2.3.3" 
+python -m pip install "bcrypt==4.1.3" 
+python -m pip install "flask-bcrypt==1.0.1" 
+python -m pip install "Flask-WTF==1.1.1" 
+python -m pip install redis
+python -m pip install pushbullet.py
 
 ### Setup nginx to proxy to gunicorn
 clear
