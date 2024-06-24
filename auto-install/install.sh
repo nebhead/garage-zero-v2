@@ -38,7 +38,7 @@ r=$(( r < 20 ? 20 : r ))
 c=$(( c < 70 ? 70 : c ))
 
 # Display the welcome dialog
-whiptail --msgbox --backtitle "Welcome" --title "Garage-Zero v2 Automated Installer" "This installer will transform your Raspberry Pi into a smart garage door controller.  NOTE: This installer is intended to be run on a fresh install of Raspberry Pi OS (Buster).  This script is currently in Alpha testing so there may be bugs." ${r} ${c}
+whiptail --msgbox --backtitle "Welcome" --title "Garage-Zero v2 Automated Installer" "This installer will transform your Raspberry Pi into a smart garage door controller.  NOTE: This installer is intended to be run on a fresh install of Raspberry Pi OS (Bullseye or Bookworm). " ${r} ${c}
 
 # Starting actual steps for installation
 clear
@@ -151,6 +151,11 @@ echo "*************************************************************************"
 # Copy configuration files (control.conf, webapp.conf) to supervisor config directory
 # NOTE: If you used a different directory for garage-zero then make sure you edit the *.conf files appropriately
 cd /usr/local/bin/garage-zero-v2/auto-install/supervisor
+
+# Add the current username to the configuration files 
+echo "user=" $USER | tee -a control.conf > /dev/null
+echo "user=" $USER | tee -a webapp.conf > /dev/null
+
 $SUDO cp *.conf /etc/supervisor/conf.d/
 
 SVISOR=$(whiptail --title "Would you like to enable the supervisor WebUI?" --radiolist "This allows you to check the status of the supervised processes via a web browser, and also allows those processes to be restarted directly from this interface. (Recommended)" 20 78 2 "ENABLE_SVISOR" "Enable the WebUI" ON "DISABLE_SVISOR" "Disable the WebUI" OFF 3>&1 1>&2 2>&3)
