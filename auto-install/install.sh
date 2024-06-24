@@ -71,7 +71,7 @@ echo "**                                                                     **"
 echo "**      Installing Dependancies... (This could take several minutes)   **"
 echo "**                                                                     **"
 echo "*************************************************************************"
-$SUDO apt install python3-dev python3-pip python3-rpi.gpio nginx git gunicorn3 supervisor redis-server -y
+$SUDO apt install python3-dev python3-pip python3-venv python3-rpi.gpio nginx git supervisor redis-server -y
 
 # Grab project files
 clear
@@ -114,7 +114,8 @@ echo " - Installing module dependencies... "
 python -m pip install "flask==2.3.3" 
 python -m pip install "bcrypt==4.1.3" 
 python -m pip install "flask-bcrypt==1.0.1" 
-python -m pip install "Flask-WTF==1.1.1" 
+python -m pip install "Flask-WTF==1.1.1"
+python -m pip install gunicorn
 python -m pip install redis
 python -m pip install pushbullet.py
 
@@ -153,8 +154,8 @@ echo "*************************************************************************"
 cd /usr/local/bin/garage-zero-v2/auto-install/supervisor
 
 # Add the current username to the configuration files 
-echo "user=" $USER | tee -a control.conf > /dev/null
-echo "user=" $USER | tee -a webapp.conf > /dev/null
+printf "\nuser=$USER\n" | tee -a control.conf > /dev/null
+printf "\nuser=$USER\n" | tee -a webapp.conf > /dev/null
 
 $SUDO cp *.conf /etc/supervisor/conf.d/
 
