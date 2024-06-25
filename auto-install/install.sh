@@ -114,7 +114,7 @@ echo " - Installing module dependencies... "
 python -m pip install "flask==2.3.3" 
 python -m pip install "bcrypt==4.1.3" 
 python -m pip install "flask-bcrypt==1.0.1" 
-python -m pip install "Flask-WTF==1.1.1"
+python -m pip install "Flask-WTF==1.2.1"
 python -m pip install gunicorn
 python -m pip install redis
 python -m pip install pushbullet.py
