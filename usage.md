@@ -4,7 +4,7 @@ permalink: /usage
 sort: 4
 ---
 ## Using Garage Zero
-If you've configured the supervisord correctly, the application scripts should run upon a reboot.  Once the system is up and running, you should be able to access the WebUI via a browser on your smart phone, tablet or PC device.  
+If you completed the installation procedure then the application scripts should run upon a reboot.  Once the system is up and running, you should be able to access the WebUI via a browser on your smart phone, tablet or PC device.  
 
 Simply navigate to the IP address of your device for example (you can usually find the IP address of your device from looking at your router's configuration/status pages). My router typically assigns IPs with prefixes of 192.168.10.XXX.  I'll use examples on my home network here, so you'll see URLs like: http://192.168.10.41  Yours may look different depending on your routers firmware/manufacturer (i.e. 10.10.0.XXX, etc.)
 
