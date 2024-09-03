@@ -185,10 +185,10 @@ echo "**                                                                     **"
 echo "*************************************************************************"
 
 cd /usr/local/bin/garage-zero-v2/auto-install
-$SUDO crontab -l > my-crontab
+crontab -l > my-crontab
 # Add the following line...
 echo "0 0 1 * * cd /usr/local/bin/garage-zero-v2/logs && sh backup.sh" >> my-crontab
-$SUDO crontab my-crontab
+crontab my-crontab
 rm my-crontab
 
 # Rebooting
