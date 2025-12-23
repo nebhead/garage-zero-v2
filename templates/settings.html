@@ -195,6 +195,70 @@
 <!-- End of Notification Settings Card -->
 <br><br>
 
+<!-- MQTT Home Assistant Integration Card -->
+<div class="card shadow">
+	<div class="card-header bg-primary">
+		<i class="fas fa-home"></i>&nbsp; MQTT Home Assistant Integration
+	</div>
+	<div class="card-body">
+		<form name="mqtt_settings" action="/settings" method="POST">
+		<div class="card shadow">
+			<div class="card-header bg-info">
+				<i class="fas fa-network-wired"></i>&nbsp; MQTT Configuration
+			</div>
+			<div class="card-body">
+				<p>
+					Connect your garage doors to Home Assistant via MQTT Discovery. This provides automatic configuration 
+					with real-time updates and no YAML editing required.
+				</p>
+				<p>
+					<strong>Requirements:</strong> MQTT broker (like Mosquitto) installed and the <code>paho-mqtt</code> Python package.
+				</p>
+				<div class="form-check form-switch mb-3">
+					<input class="form-check-input" type="checkbox" id="mqtt_enabled" name="mqtt_enabled" {% if settings['mqtt_ha']['enabled'] %}checked{% endif %}>
+					<label class="form-check-label" for="mqtt_enabled">
+						<strong>Enable MQTT Integration</strong>
+					</label>
+				</div>
+				<div class="mb-3">
+					<label for="mqtt_broker" class="form-label">MQTT Broker Address:</label>
+					<input type="text" class="form-control" id="mqtt_broker" name="mqtt_broker" value="{{ settings['mqtt_ha']['broker'] }}" placeholder="localhost">
+					<small class="form-text text-muted">IP address or hostname of your MQTT broker</small>
+				</div>
+				<div class="mb-3">
+					<label for="mqtt_port" class="form-label">MQTT Port:</label>
+					<input type="number" class="form-control" id="mqtt_port" name="mqtt_port" value="{{ settings['mqtt_ha']['port'] }}" placeholder="1883">
+					<small class="form-text text-muted">Default is 1883</small>
+				</div>
+				<div class="mb-3">
+					<label for="mqtt_username" class="form-label">Username (optional):</label>
+					<input type="text" class="form-control" id="mqtt_username" name="mqtt_username" value="{{ settings['mqtt_ha']['username'] }}" placeholder="">
+				</div>
+				<div class="mb-3">
+					<label for="mqtt_password" class="form-label">Password (optional):</label>
+					<input type="password" class="form-control" id="mqtt_password" name="mqtt_password" value="{{ settings['mqtt_ha']['password'] }}" placeholder="">
+				</div>
+				<div class="mb-3">
+					<label for="mqtt_discovery_prefix" class="form-label">Discovery Prefix:</label>
+					<input type="text" class="form-control" id="mqtt_discovery_prefix" name="mqtt_discovery_prefix" value="{{ settings['mqtt_ha']['discovery_prefix'] }}" placeholder="homeassistant">
+					<small class="form-text text-muted">Home Assistant's MQTT discovery prefix (default: homeassistant)</small>
+				</div>
+				<div class="mb-3">
+					<label for="mqtt_base_topic" class="form-label">Base Topic:</label>
+					<input type="text" class="form-control" id="mqtt_base_topic" name="mqtt_base_topic" value="{{ settings['mqtt_ha']['base_topic'] }}" placeholder="garage-zero">
+					<small class="form-text text-muted">Base MQTT topic for garage-zero messages</small>
+				</div>
+			</div>
+			<div class="card-footer">
+				<button type="submit" class="btn btn-primary">Save MQTT Settings</button>
+			</div>
+		</div>
+		</form>
+	</div>
+</div>
+<!-- End MQTT Home Assistant Integration Card -->
+<br><br>
+
 <!-- Door Settings Services Card -->
 <div class="card shadow">
 	<div class="card-header bg-primary">

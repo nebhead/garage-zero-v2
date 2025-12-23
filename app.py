@@ -367,6 +367,20 @@ def settings_base(action=None):
 		alert['type'] = 'success'
 		alert['text'] = 'Public / Local URL updated to ' + newurl + '.'
 
+	# Update MQTT Settings
+	if('mqtt_broker' in request.form):
+		settings['mqtt_ha']['enabled'] = True if 'mqtt_enabled' in request.form else False
+		settings['mqtt_ha']['broker'] = request.form['mqtt_broker']
+		settings['mqtt_ha']['port'] = int(request.form['mqtt_port'])
+		settings['mqtt_ha']['username'] = request.form['mqtt_username']
+		settings['mqtt_ha']['password'] = request.form['mqtt_password']
+		settings['mqtt_ha']['discovery_prefix'] = request.form['mqtt_discovery_prefix']
+		settings['mqtt_ha']['base_topic'] = request.form['mqtt_base_topic']
+		write_settings(settings)
+		cmdsts.set('settings_update', 'true')
+		alert['type'] = 'success'
+		alert['text'] = 'MQTT Home Assistant settings updated. Changes will take effect when control.py reloads.'
+
 	if('del_door' in request.form):
 		delete_door_id = request.form['del_door']
 		alert['type'] = 'error'

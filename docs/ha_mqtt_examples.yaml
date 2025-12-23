@@ -1,0 +1,133 @@
+# Home Assistant MQTT Auto-Discovery Example
+# 
+# This file shows what the MQTT integration automatically creates.
+# NO YAML CONFIGURATION IS NEEDED - this is for reference only!
+#
+# When you enable MQTT in Garage-Zero settings, doors automatically appear
+# in Home Assistant as cover entities within seconds.
+
+# ============================================================================
+# What gets auto-created (you don't need to add this):
+# ============================================================================
+
+# First Door appears as: cover.first_door
+# - Device Class: garage
+# - States: open, closed, opening, closing
+# - Actions: open, close, stop
+
+# Second Door appears as: cover.second_door
+# - Device Class: garage  
+# - States: open, closed, opening, closing
+# - Actions: open, close, stop
+
+# ============================================================================
+# Example Usage in Automations
+# ============================================================================
+
+automation:
+  # Close garage at night
+  - alias: "Close Garage Door at 10 PM"
+    trigger:
+      - platform: time
+        at: "22:00:00"
+    condition:
+      - condition: state
+        entity_id: cover.first_door
+        state: "open"
+    action:
+      - service: cover.close_cover
+        target:
+          entity_id: cover.first_door
+
+  # Notify if left open for 30 minutes
+  - alias: "Garage Open Too Long Alert"
+    trigger:
+      - platform: state
+        entity_id: cover.first_door
+        to: "open"
+        for:
+          minutes: 30
+    action:
+      - service: notify.mobile_app_your_phone
+        data:
+          title: "Garage Door Alert"
+          message: "First Door has been open for 30 minutes"
+
+  # Close both doors at bedtime
+  - alias: "Close All Garage Doors"
+    trigger:
+      - platform: time
+        at: "23:00:00"
+    action:
+      - service: cover.close_cover
+        target:
+          entity_id:
+            - cover.first_door
+            - cover.second_door
+
+# ============================================================================
+# Example Lovelace Card Configuration
+# ============================================================================
+
+# Simple entity card
+type: entities
+entities:
+  - entity: cover.first_door
+  - entity: cover.second_door
+
+# Or button cards
+type: horizontal-stack
+cards:
+  - type: button
+    entity: cover.first_door
+    name: First Door
+    icon: mdi:garage
+    tap_action:
+      action: toggle
+    show_state: true
+  - type: button
+    entity: cover.second_door
+    name: Second Door
+    icon: mdi:garage
+    tap_action:
+      action: toggle
+    show_state: true
+
+# Garage door card (if using custom:garage-card)
+type: custom:garage-card
+entity: cover.first_door
+name: First Door
+
+# ============================================================================
+# For comparison: OLD REST API method (NO LONGER RECOMMENDED)
+# ============================================================================
+# The old way required all this manual YAML configuration:
+#
+# sensor:
+#   - platform: rest
+#     scan_interval: 30
+#     resource: http://192.168.1.100:5000/api/YOUR_API_KEY
+#     name: "Garage Door"
+#     value_template: "{{ value_json['First Door']['status']['limitsensorclosed'] }}"
+#
+# switch:
+#   - platform: rest
+#     name: "Garage Door"
+#     resource: http://192.168.1.100:5000/api/YOUR_API_KEY
+#     scan_interval: 30
+#     body_on: '{"DoorButton" : "First Door"}'
+#     body_off: '{"DoorButton" : "First Door"}'
+#
+# cover:
+#   - platform: template
+#     covers:
+#       garage_door:
+#         device_class: garage
+#         friendly_name: "Garage Door"
+#         value_template: "{{ states('sensor.garage_door') }}"
+#         open_cover:
+#           - service: switch.turn_on
+#             target:
+#               entity_id: switch.garage_door
+#
+# MQTT Discovery eliminates ALL of this! Just enable MQTT in settings.
