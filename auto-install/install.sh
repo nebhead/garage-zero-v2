@@ -325,6 +325,8 @@ fi
 # If supervisor isn't already running, startup Supervisor
 $SUDO service supervisor start 2>&1 | tee -a ~/logs/install.log
 
+$SUDO mkdir -p /usr/local/bin/garage-zero-v2/logs
+
 # Ask user if they want to reboot
 if whiptail --backtitle "Install Complete" --title "Installation Completed" --yesno "Congratulations, the installation is complete.\n\nIt's recommended to reboot your system now for all changes to take effect.\n\nYou should be able to access your application by opening a browser on your PC or other device and using the IP address (or http://[hostname].local) for this device.\n\nWould you like to reboot now?" ${r} ${c}; then
     echo "Rebooting system..." | tee -a ~/logs/install.log
