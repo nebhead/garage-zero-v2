@@ -221,7 +221,7 @@ $SUDO usermod -a -G garagezero root
 # Change ownership to group=garagezero for all files/directories in garagezero 
 $SUDO chown -R $USER:garagezero garage-zero-v2 
 # Change ability for garagezero group to read/write/execute 
-$SUDO chmod -R 775 garage-zero-v2/
+$SUDO chmod -R 777 /usr/local/bin
 
 # Install UV (Universal Virtualenv) for Python 3.11+
 echo " + Installing UV" | tee -a ~/logs/install.log
