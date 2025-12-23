@@ -43,6 +43,14 @@
 					<td> <i class="fas fa-exclamation-circle"></i>&nbsp; Access Denied </td>
 				{% elif 'API' in door_history[events-1-row][column] %}
 					<td> <i class="fas fa-globe"></i>&nbsp; API Call </td>
+				{% elif 'MQTT_ERROR' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-bomb"></i>&nbsp; MQTT Error! </td>
+				{% elif 'MQTT_WARN' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-exclamation-circle"></i>&nbsp; MQTT Warning! </td>
+				{% elif 'MQTT_CALL' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-globe"></i>&nbsp; MQTT Call </td>
+				{% elif 'MQTT_STATUS' in door_history[events-1-row][column] %}
+					<td> <i class="fas fa-globe"></i>&nbsp; MQTT Status </td>
 				{% else %}
 					<td> {{ door_history[events-1-row][column] }} </td>
 				{% endif %}

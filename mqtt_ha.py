@@ -100,15 +100,15 @@ class MQTTHomeAssistant:
 		try:
 			self.client.connect(self.broker, self.port, 60)
 			self.client.loop_start()
-			write_log(f"MQTT: Connected to broker at {self.broker}:{self.port}", logtype='MQTT')
+			write_log(f"MQTT: Connected to broker at {self.broker}:{self.port}", logtype='MQTT_STATUS')
 		except Exception as e:
-			write_log(f"MQTT: Failed to connect to broker: {e}", logtype='ERROR')
+			write_log(f"MQTT: Failed to connect to broker: {e}", logtype='MQTT_ERROR')
 			self.enabled = False
 	
 	def _on_connect(self, client, userdata, flags, rc):
 		"""Callback when connected to MQTT broker."""
 		if rc == 0:
-			write_log("MQTT: Successfully connected to broker", logtype='MQTT')
+			write_log("MQTT: Successfully connected to broker", logtype='MQTT_STATUS')
 			# Publish discovery configs for all doors
 			self._publish_discovery()
 			# Subscribe to command topics
@@ -116,12 +116,12 @@ class MQTTHomeAssistant:
 			# Publish initial states
 			self._publish_all_states()
 		else:
-			write_log(f"MQTT: Connection failed with code {rc}", logtype='ERROR')
+			write_log(f"MQTT: Connection failed with code {rc}", logtype='MQTT_ERROR')
 	
 	def _on_disconnect(self, client, userdata, rc):
 		"""Callback when disconnected from MQTT broker."""
 		if rc != 0:
-			write_log(f"MQTT: Unexpected disconnection (code {rc}). Reconnecting...", logtype='WARNING')
+			write_log(f"MQTT: Unexpected disconnection (code {rc}). Reconnecting...", logtype='MQTT_WARN')
 	
 	def _on_message(self, client, userdata, msg):
 		"""Callback when a message is received on a subscribed topic."""
@@ -143,9 +143,9 @@ class MQTTHomeAssistant:
 				if door_obj:
 					self._handle_command(door_obj, command)
 				else:
-					write_log(f"MQTT: Unknown door ID in command: {door_id}", logtype='WARNING')
+					write_log(f"MQTT: Unknown door ID in command: {door_id}", logtype='MQTT_WARN')
 		except Exception as e:
-			write_log(f"MQTT: Error processing message: {e}", logtype='ERROR')
+			write_log(f"MQTT: Error processing message: {e}", logtype='MQTT_ERROR')
 	
 	def _handle_command(self, door_obj, command):
 		"""
@@ -155,7 +155,7 @@ class MQTTHomeAssistant:
 			door_obj: DoorObj instance to control
 			command: Command string (OPEN, CLOSE, STOP)
 		"""
-		write_log(f"MQTT: Received command '{command}' for door '{door_obj.name}'", logtype='MQTT')
+		write_log(f"MQTT: Received command '{command}' for door '{door_obj.name}'", logtype='MQTT_CALL')
 		
 		if command in ['OPEN', 'CLOSE', 'STOP']:
 			# All commands trigger the door button (toggle behavior)
@@ -167,7 +167,7 @@ class MQTTHomeAssistant:
 			elif command == 'CLOSE':
 				self._publish_state(door_obj, 'closing')
 		else:
-			write_log(f"MQTT: Unknown command: {command}", logtype='WARNING')
+			write_log(f"MQTT: Unknown command: {command}", logtype='MQTT_WARN')
 	
 	def _sanitize_id(self, door_id):
 		"""
@@ -253,7 +253,7 @@ class MQTTHomeAssistant:
 			discovery_topic = f"{self.discovery_prefix}/cover/{door_id}/config"
 			self.client.publish(discovery_topic, json.dumps(config), retain=True)
 			
-			write_log(f"MQTT: Published discovery for door '{door.name}'", logtype='MQTT')
+			write_log(f"MQTT: Published discovery for door '{door.name}'", logtype='MQTT_STATUS')
 	
 	def _subscribe_commands(self):
 		"""Subscribe to command topics for all doors."""
@@ -262,7 +262,7 @@ class MQTTHomeAssistant:
 			command_topic = f"{self.base_topic}/{door_id}/set"
 			self.client.subscribe(command_topic)
 		
-		write_log(f"MQTT: Subscribed to command topics for {len(self.doors_list)} door(s)", logtype='MQTT')
+		write_log(f"MQTT: Subscribed to command topics for {len(self.doors_list)} door(s)", logtype='MQTT_STATUS')
 	
 	def _publish_state(self, door_obj, state=None):
 		"""
@@ -315,4 +315,4 @@ class MQTTHomeAssistant:
 			
 			self.client.loop_stop()
 			self.client.disconnect()
-			write_log("MQTT: Disconnected and cleaned up", logtype='MQTT')
+			write_log("MQTT: Disconnected and cleaned up", logtype='MQTT_STATUS')
