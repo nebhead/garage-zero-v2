@@ -223,17 +223,10 @@ $SUDO chown -R $USER:garagezero garage-zero-v2
 # Change ability for garagezero group to read/write/execute 
 $SUDO chmod -R 777 /usr/local/bin
 
-# Install UV (Universal Virtualenv) for Python 3.11+
-echo " + Installing UV" | tee -a ~/logs/install.log
-if ! /bin/curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="/usr/local/bin" /bin/sh; then
-    echo " ! Failed to download or install UV. Exiting." | tee -a ~/logs/install.log
-    exit 1
-fi
-
 echo " - Setting up VENV" | tee -a ~/logs/install.log
 # Setup VENV
 cd /usr/local/bin/garage-zero-v2
-uv venv --system-site-packages .venv
+python3 -m venv --system-site-packages .venv
 
 # Activate VENV
 source .venv/bin/activate 
@@ -255,7 +248,7 @@ while IFS= read -r req || [ -n "$req" ]; do
             ;;
     esac
     echo " - Installing $req ..." | tee -a ~/logs/install.log
-    uv pip install "$req" 2>&1 | tee -a ~/logs/install.log
+    pip install "$req" 2>&1 | tee -a ~/logs/install.log
     status=${PIPESTATUS[0]}
     if [ $status -ne 0 ]; then
         echo " !! Failed to install $req. Installation cannot continue." | tee -a ~/logs/install.log
