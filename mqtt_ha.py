@@ -204,20 +204,53 @@ class MQTTHomeAssistant:
 		has_open_sensor = 'limitsensoropen' in door_obj.inpins
 		has_closed_sensor = 'limitsensorclosed' in door_obj.inpins
 		
+		# Get sensor values
+		open_state = None
+		closed_state = None
+		
 		if has_open_sensor:
 			open_state = door_obj.cmdsts.hget('doorobj:' + door_obj.id, 'limitsensoropen')
-			if open_state == b'1' or open_state == '1':
-				return 'open'
+			open_state = open_state == b'1' or open_state == '1'
 		
 		if has_closed_sensor:
 			closed_state = door_obj.cmdsts.hget('doorobj:' + door_obj.id, 'limitsensorclosed')
-			if closed_state == b'1' or closed_state == '1':
-				return 'closed'
+			closed_state = closed_state == b'1' or closed_state == '1'
 		
-		# If we have both sensors and neither is triggered, door is in motion or unknown
+		# Determine state based on available sensors
 		if has_open_sensor and has_closed_sensor:
-			return 'unknown'
+			# Both sensors available
+			if open_state:
+				return 'open'
+			elif closed_state:
+				return 'closed'
+			else:
+				# Neither sensor triggered - infer direction from previous state
+				if door_id in self.last_states:
+					last_state = self.last_states[door_id]
+					# If already in transitional state, keep it
+					if last_state in ['opening', 'closing']:
+						return last_state
+					# Otherwise infer from previous stable state
+					elif last_state == 'closed':
+						return 'opening'
+					elif last_state == 'open':
+						return 'closing'
+				# Default if no previous state
+				return 'open'
+		elif has_open_sensor:
+			# Only open sensor
+			if open_state:
+				return 'open'
+			else:
+				return 'closed'
+		elif has_closed_sensor:
+			# Only closed sensor
+			if closed_state:
+				return 'closed'
+			else:
+				return 'open'
 		
+		# No sensors configured
 		return 'unknown'
 	
 	def _publish_discovery(self):
