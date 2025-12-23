@@ -179,7 +179,7 @@ echo "**      Installing Dependencies... (This could take several minutes)   **"
 echo "**                                                                     **" | tee -a ~/logs/install.log
 echo "*************************************************************************" | tee -a ~/logs/install.log
 # Install dependencies, exit if failed
-$SUDO apt install python3-dev python3-pip python3-venv python3-rpi.gpio nginx git supervisor redis-server -y 2>&1 | tee -a ~/logs/install.log
+$SUDO apt install python3-dev python3-pip python3-venv python3-rpi.gpio python3-bcrypt nginx git supervisor redis-server -y 2>&1 | tee -a ~/logs/install.log
 if [ ${PIPESTATUS[0]} -ne 0 ]; then
     echo " !! Failed to install dependencies. Installation cannot continue." | tee -a ~/logs/install.log
     exit 1

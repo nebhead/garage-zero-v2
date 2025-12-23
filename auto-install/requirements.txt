@@ -1,5 +1,4 @@
 flask==3.1.2
-bcrypt==5.0.0
 flask-bcrypt==1.0.1
 flask-wtf==1.2.2
 gunicorn==23.0.0
