@@ -161,14 +161,24 @@ class MQTTHomeAssistant:
 		write_log(f"MQTT: Received command '{command}' for door '{door_obj.name}'", logtype='MQTT_CALL')
 		
 		if command in ['OPEN', 'CLOSE', 'STOP']:
-			# All commands trigger the door button (toggle behavior)
-			self.cmdsts.hset('doorobj:' + door_obj.id, 'doorbutton', '1')
+			# Get current door state
+			current_state = self._get_door_state(door_obj)
 			
-			# Publish intermediate state
-			if command == 'OPEN':
+			# Validate command against current state for security
+			if command == 'OPEN' and current_state == 'closed':
+				# Only open if door is closed
+				self.cmdsts.hset('doorobj:' + door_obj.id, 'doorbutton', '1')
 				self._publish_state(door_obj, 'opening')
-			elif command == 'CLOSE':
+			elif command == 'CLOSE' and current_state == 'open':
+				# Only close if door is open
+				self.cmdsts.hset('doorobj:' + door_obj.id, 'doorbutton', '1')
 				self._publish_state(door_obj, 'closing')
+			elif command == 'STOP' and current_state in ['opening', 'closing']:
+				# Only stop if door is moving
+				self.cmdsts.hset('doorobj:' + door_obj.id, 'doorbutton', '1')
+			else:
+				# Command doesn't match current state - ignore it
+				write_log(f"MQTT: Ignoring '{command}' command - door is {current_state}", logtype='MQTT_WARN')
 		else:
 			write_log(f"MQTT: Unknown command: {command}", logtype='MQTT_WARN')
 	
