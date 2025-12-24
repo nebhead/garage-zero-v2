@@ -31,8 +31,11 @@ This project utilizes a Raspberry Pi Zero W (or even the new Pi Zero W 2!), plug
 	- Passcodes are stored as hashes using bcrypt
 - Themes
 	- Supports bootstrap css themeing and includes themes from [bootswatch.com](https://bootswatch.com/)
+- Home Assistant Integration
+	- **MQTT Discovery** (Recommended) - Auto-configures garage doors as native cover entities. See [docs/mqtt_ha.md](docs/mqtt_ha.md)
+	- REST API - Manual YAML configuration option
 - API
-	- Intended to integrate with Home Assistant cover support
+	- RESTful API for custom integrations
 
 ## Screenshots
 
@@ -82,7 +85,7 @@ This project is licensed under the MIT license.
 ```
 MIT License
 
-Copyright (c) 2022 Ben Parmeter and Contributors
+Copyright (c) 2025 Ben Parmeter and Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

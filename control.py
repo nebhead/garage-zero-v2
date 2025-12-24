@@ -25,6 +25,7 @@ import redis
 import notify
 from gzlogging import write_log
 import time
+from mqtt_ha import MQTTHomeAssistant
 
 """
  *****************************************
@@ -60,6 +61,11 @@ def main():
 	door_objects_list = setup_door_objects(notify_objects_list)
 	add_on_objects_list = setup_add_on_objects()
 
+	# Setup MQTT Home Assistant Integration
+	mqtt_ha = None
+	if settings.get('mqtt_ha', {}).get('enabled', False):
+		mqtt_ha = MQTTHomeAssistant(settings['mqtt_ha'], door_objects_list)
+
 	# Setup Redis Key/Value for settings change notification
 	cmdsts.set('settings_update', 'false')
 
@@ -72,15 +78,30 @@ def main():
 		for addon in add_on_objects_list:
 			addon.run()
 
+		# Update MQTT states
+		if mqtt_ha:
+			mqtt_ha.update()
+
 		# Check for any settings changes and update if needed
 		if(cmdsts.get('settings_update') == b'true'):
 			event = "Settings update detected.  Reloading settings into control script."
 			write_log(event, logtype='SETTINGS')
 			#print(event)
+			
+			# Cleanup MQTT before reloading
+			if mqtt_ha:
+				mqtt_ha.cleanup()
+			
 			cmdsts.flushall()  # Destroy any existing information in Redis DB
 			settings = read_settings()  # Get initial settings
 			notify_objects_list = setup_notify_objects()
 			door_objects_list = setup_door_objects(notify_objects_list)
+			
+			# Reinitialize MQTT with new settings
+			mqtt_ha = None
+			if settings.get('mqtt_ha', {}).get('enabled', False):
+				mqtt_ha = MQTTHomeAssistant(settings['mqtt_ha'], door_objects_list)
+			
 			cmdsts.set('settings_update', 'false')
 			
 		#print('... looping ...')

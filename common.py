@@ -106,6 +106,16 @@ def default_settings():
 		'apikey' : ''
 	}
 
+	settings['mqtt_ha'] = {
+		'enabled' : False,
+		'broker' : 'localhost',
+		'port' : 1883,
+		'username' : '',
+		'password' : '',
+		'discovery_prefix' : 'homeassistant',
+		'base_topic' : 'garage-zero'
+	}
+
 	return settings
 
 def default_door_obj_data():
