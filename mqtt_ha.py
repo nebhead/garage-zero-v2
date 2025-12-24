@@ -27,6 +27,7 @@
 import json
 import time
 from gzlogging import write_log
+import redis
 
 try:
 	import paho.mqtt.client as mqtt
@@ -65,6 +66,8 @@ class MQTTHomeAssistant:
 				- base_topic: Base topic for garage-zero (default "garage-zero")
 			doors_list: List of DoorObj instances to publish
 		"""
+		self.cmdsts = redis.Redis()
+
 		if not MQTT_AVAILABLE:
 			self.enabled = False
 			return
@@ -159,7 +162,7 @@ class MQTTHomeAssistant:
 		
 		if command in ['OPEN', 'CLOSE', 'STOP']:
 			# All commands trigger the door button (toggle behavior)
-			door_obj.cmdsts.hset('doorobj:' + door_obj.id, 'DoorButton', 'true')
+			self.cmdsts.hset('doorobj:' + door_obj.id, 'doorbutton', '1')
 			
 			# Publish intermediate state
 			if command == 'OPEN':
@@ -209,11 +212,11 @@ class MQTTHomeAssistant:
 		closed_state = None
 		
 		if has_open_sensor:
-			open_state = door_obj.cmdsts.hget('doorobj:' + door_obj.id, 'limitsensoropen')
+			open_state = self.cmdsts.hget('doorobj:' + door_obj.id, 'limitsensoropen')
 			open_state = open_state == b'1' or open_state == '1'
 		
 		if has_closed_sensor:
-			closed_state = door_obj.cmdsts.hget('doorobj:' + door_obj.id, 'limitsensorclosed')
+			closed_state = self.cmdsts.hget('doorobj:' + door_obj.id, 'limitsensorclosed')
 			closed_state = closed_state == b'1' or closed_state == '1'
 		
 		# Determine state based on available sensors
