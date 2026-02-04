@@ -32,6 +32,9 @@ from mqtt_ha import MQTTHomeAssistant
  	Init Variables
  *****************************************
 """
+event = 'Control Script Starting.'
+write_log(event, logtype='STARTUP')
+
 settings = read_settings()  # Get initial settings
 
 # Special import for debug purposes 
@@ -41,12 +44,17 @@ if settings['debug']['enable'] == True:
 else:
 	from door_raspi import RasPiDoorObj as DoorObject
 	#print('... Loading Raspberry Pi Module ...')
-
-cmdsts = redis.Redis()  # Setup connection to Redis DB
+while True:
+	try:
+		cmdsts = redis.Redis()  # Setup connection to Redis DB
+		event = '(control) Redis Server connection established.'
+		write_log(event, logtype='STARTUP')
+		break
+	except:
+		event = '(control) Redis Server not running.  Retrying in 1 second...'
+		write_log(event, logtype='ERROR')
+		time.sleep(1)
 cmdsts.flushall()  # Destroy any existing information in Redis DB
-
-event = 'Control Script Starting.'
-write_log(event, logtype='STARTUP')
 
 """
  *****************************************

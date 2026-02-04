@@ -9,6 +9,7 @@ from common import *
 from gzlogging import *
 import redis
 import secrets
+import time
 
 """
 Globals
@@ -17,7 +18,21 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)  # Re-enabling bcrypt ror Raspberry Pi 6/24
 app.config['SECRET_KEY'] = 'ADD_YOUR_SECRET_HERE'
 settings = read_settings()
-cmdsts = redis.Redis()
+
+event = 'Webapp Script Starting.'
+write_log(event, logtype='STARTUP')
+
+while True:
+	try:
+		cmdsts = redis.Redis()  # Setup connection to Redis DB
+		event = '(webapp) Redis Server connection established.'
+		write_log(event, logtype='STARTUP')
+		break
+	except:
+		event = '(webapp) Redis Server not running.  Retrying in 1 second...'
+		write_log(event, logtype='ERROR')
+		time.sleep(1)
+
 INPIN_TYPES = ['limitsensoropen', 'limitsensorclosed']
 OUTPIN_TYPES = ['doorbutton']
 temp_door = {}
