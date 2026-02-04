@@ -76,6 +76,30 @@ class DoorObj:
 	def toggle_output(self, outputname):
 		pass
 
+	def _coerce_redis_int(self, value, default=0):
+		if value is None:
+			return default
+		if isinstance(value, bytes):
+			value = value.decode().strip()
+		if isinstance(value, bool):
+			return int(value)
+		if isinstance(value, int):
+			return value
+		if isinstance(value, str):
+			lowered = value.lower()
+			if lowered in ("true", "on", "yes"):
+				return 1
+			if lowered in ("false", "off", "no"):
+				return 0
+			try:
+				return int(value)
+			except ValueError:
+				return default
+		try:
+			return int(value)
+		except (TypeError, ValueError):
+			return default
+
 	def get_input_status(self):
 		return self.currentinputs
 
@@ -172,7 +196,7 @@ class DoorObj:
 	def check_output_command(self):
 		#  For each of the relays, check key / value pair
 		for item, value in self.outpins.items():
-			output_value = int(self.cmdsts.hget('doorobj:' + self.id, item))
+			output_value = self._coerce_redis_int(self.cmdsts.hget('doorobj:' + self.id, item))
 			# If button press is requested, toggle output and clear Redis status
 			if output_value == self.RELAY_ON:
 				self.toggle_output(item)

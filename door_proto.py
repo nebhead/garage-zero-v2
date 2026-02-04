@@ -40,7 +40,7 @@ class ProtoDoorObj(DoorObj):
 	def get_input_status(self): 
 		#  For each of the relays, check key / value pair
 		for item, value in self.inpins.items():
-			self.currentinputs[item] = int(self.cmdsts.hget('doorobj:' + self.id, item))
+			self.currentinputs[item] = self._coerce_redis_int(self.cmdsts.hget('doorobj:' + self.id, item))
 		return self.currentinputs
 
 	def set_input(self, input, value):
