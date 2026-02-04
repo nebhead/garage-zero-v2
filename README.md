@@ -85,7 +85,7 @@ This project is licensed under the MIT license.
 ```
 MIT License
 
-Copyright (c) 2025 Ben Parmeter and Contributors
+Copyright (c) 2026 Ben Parmeter and Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
