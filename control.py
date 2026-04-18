@@ -25,6 +25,8 @@ import redis
 import notify
 from gzlogging import write_log
 import time
+import os
+import socket
 from mqtt_ha import MQTTHomeAssistant
 
 """
@@ -77,6 +79,10 @@ def main():
 	# Setup Redis Key/Value for settings change notification
 	cmdsts.set('settings_update', 'false')
 
+	# Periodic health log cadence (seconds)
+	health_log_interval = 300
+	next_health_log = time.time() + health_log_interval
+
 	# Main Loop
 	while True:
 		# Loop through all defined doors and check status
@@ -88,7 +94,10 @@ def main():
 
 		# Update MQTT states
 		if mqtt_ha:
-			mqtt_ha.update()
+			try:
+				mqtt_ha.update()
+			except Exception as e:
+				write_log(f"MQTT: Unhandled error in update loop: {e}", logtype='MQTT_ERROR')
 
 		# Check for any settings changes and update if needed
 		if(cmdsts.get('settings_update') == b'true'):
@@ -111,6 +120,12 @@ def main():
 				mqtt_ha = MQTTHomeAssistant(settings['mqtt_ha'], door_objects_list)
 			
 			cmdsts.set('settings_update', 'false')
+
+		# Periodic health heartbeat for long-run diagnostics
+		now = time.time()
+		if now >= next_health_log:
+			log_health_status(mqtt_ha)
+			next_health_log = now + health_log_interval
 			
 		#print('... looping ...')
 		time.sleep(0.1)
@@ -161,6 +176,61 @@ def setup_add_on_objects():
 			add_on_objects_list.append(HeartBeat_RasPi(object['name'], object['outpins'], object['inpins'], object['triggerlevel'], object['sensorlevel'], object['interval']))
 
 	return add_on_objects_list
+
+def _read_mem_available_kb():
+	"""Return MemAvailable from /proc/meminfo in kB, or -1 when unavailable."""
+	try:
+		with open('/proc/meminfo', 'r', encoding='utf-8') as meminfo:
+			for line in meminfo:
+				if line.startswith('MemAvailable:'):
+					return int(line.split()[1])
+	except Exception:
+		pass
+	return -1
+
+def _get_primary_ip():
+	"""Best-effort local IP discovery without generating external traffic."""
+	try:
+		with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+			s.connect(('8.8.8.8', 80))
+			return s.getsockname()[0]
+	except Exception:
+		try:
+			return socket.gethostbyname(socket.gethostname())
+		except Exception:
+			return 'unknown'
+
+def log_health_status(mqtt_ha=None):
+	"""Write a periodic health line to help diagnose long-run instability."""
+	global cmdsts
+
+	redis_ok = False
+	redis_ms = -1.0
+	try:
+		start = time.perf_counter()
+		cmdsts.ping()
+		redis_ms = (time.perf_counter() - start) * 1000
+		redis_ok = True
+	except Exception:
+		redis_ok = False
+
+	try:
+		load1, load5, load15 = os.getloadavg()
+	except Exception:
+		load1, load5, load15 = -1.0, -1.0, -1.0
+
+	mem_avail_kb = _read_mem_available_kb()
+	ip_address = _get_primary_ip()
+	mqtt_enabled = bool(settings.get('mqtt_ha', {}).get('enabled', False))
+	mqtt_connected = bool(getattr(mqtt_ha, 'connected', False)) if mqtt_ha else False
+
+	health_message = (
+		f"health redis_ok={redis_ok} redis_ms={redis_ms:.2f} "
+		f"mqtt_enabled={mqtt_enabled} mqtt_connected={mqtt_connected} "
+		f"load=({load1:.2f},{load5:.2f},{load15:.2f}) "
+		f"mem_avail_kb={mem_avail_kb} ip={ip_address}"
+	)
+	write_log(health_message, logtype='HEALTH')
 
 if __name__ == "__main__":
 	main()

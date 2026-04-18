@@ -26,6 +26,8 @@
 
 import json
 import time
+import socket
+import os
 from gzlogging import write_log
 import redis
 
@@ -85,15 +87,26 @@ class MQTTHomeAssistant:
 		self.password = config.get('password', '')
 		self.discovery_prefix = config.get('discovery_prefix', 'homeassistant')
 		self.base_topic = config.get('base_topic', 'garage-zero')
+		self.keepalive = config.get('keepalive', 60)
+
+		# Reconnect and logging throttles keep the process resilient under intermittent network faults.
+		self.last_reconnect_attempt = 0
+		self.reconnect_cooldown = 10
+		self.last_publish_error = 0
+		self.publish_error_cooldown = 30
+		self.connected = False
 		
 		# Track last known states to avoid redundant publishes
 		self.last_states = {}
 		
 		# Initialize MQTT client
-		self.client = mqtt.Client(client_id="garage-zero-controller")
+		hostname = socket.gethostname().replace(' ', '_')
+		client_id = f"garage-zero-{hostname}-{os.getpid()}"
+		self.client = mqtt.Client(client_id=client_id)
 		self.client.on_connect = self._on_connect
 		self.client.on_message = self._on_message
 		self.client.on_disconnect = self._on_disconnect
+		self.client.reconnect_delay_set(min_delay=1, max_delay=120)
 		
 		# Set authentication if provided
 		if self.username and self.password:
@@ -101,7 +114,7 @@ class MQTTHomeAssistant:
 		
 		# Connect to broker
 		try:
-			self.client.connect(self.broker, self.port, 60)
+			self.client.connect(self.broker, self.port, self.keepalive)
 			self.client.loop_start()
 			write_log(f"MQTT: Connected to broker at {self.broker}:{self.port}", logtype='MQTT_STATUS')
 		except Exception as e:
@@ -111,6 +124,7 @@ class MQTTHomeAssistant:
 	def _on_connect(self, client, userdata, flags, rc):
 		"""Callback when connected to MQTT broker."""
 		if rc == 0:
+			self.connected = True
 			write_log("MQTT: Successfully connected to broker", logtype='MQTT_STATUS')
 			# Publish discovery configs for all doors
 			self._publish_discovery()
@@ -119,10 +133,12 @@ class MQTTHomeAssistant:
 			# Publish initial states
 			self._publish_all_states()
 		else:
+			self.connected = False
 			write_log(f"MQTT: Connection failed with code {rc}", logtype='MQTT_ERROR')
 	
 	def _on_disconnect(self, client, userdata, rc):
 		"""Callback when disconnected from MQTT broker."""
+		self.connected = False
 		if rc != 0:
 			write_log(f"MQTT: Unexpected disconnection (code {rc}). Reconnecting...", logtype='MQTT_WARN')
 	
@@ -330,8 +346,17 @@ class MQTTHomeAssistant:
 		# Only publish if state changed
 		if self.last_states.get(door_id) != state:
 			state_topic = f"{self.base_topic}/{door_id}/state"
-			self.client.publish(state_topic, state, retain=True)
-			self.last_states[door_id] = state
+			publish_result = self.client.publish(state_topic, state, retain=True)
+			if publish_result.rc == mqtt.MQTT_ERR_SUCCESS:
+				self.last_states[door_id] = state
+			else:
+				now = time.time()
+				if now - self.last_publish_error >= self.publish_error_cooldown:
+					write_log(
+						f"MQTT: Failed to publish state for door '{door_obj.name}' (rc={publish_result.rc})",
+						logtype='MQTT_WARN'
+					)
+					self.last_publish_error = now
 			# Note: We don't log every state change to avoid log spam
 	
 	def _publish_all_states(self):
@@ -346,9 +371,22 @@ class MQTTHomeAssistant:
 		"""
 		if not self.enabled:
 			return
+
+		if not self.connected:
+			now = time.time()
+			if now - self.last_reconnect_attempt >= self.reconnect_cooldown:
+				self.last_reconnect_attempt = now
+				try:
+					self.client.reconnect()
+				except Exception as e:
+					write_log(f"MQTT: Reconnect attempt failed: {e}", logtype='MQTT_WARN')
+			return
 		
-		for door in self.doors_list:
-			self._publish_state(door)
+		try:
+			for door in self.doors_list:
+				self._publish_state(door)
+		except Exception as e:
+			write_log(f"MQTT: update() exception: {e}", logtype='MQTT_ERROR')
 	
 	def cleanup(self):
 		"""Cleanup MQTT connection."""
@@ -359,6 +397,7 @@ class MQTTHomeAssistant:
 				discovery_topic = f"{self.discovery_prefix}/cover/{door_id}/config"
 				self.client.publish(discovery_topic, "", retain=True)
 			
-			self.client.loop_stop()
 			self.client.disconnect()
+			self.client.loop_stop()
+			self.connected = False
 			write_log("MQTT: Disconnected and cleaned up", logtype='MQTT_STATUS')
