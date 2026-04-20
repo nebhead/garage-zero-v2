@@ -100,3 +100,29 @@ def write_log(event, logtype='NONE'):
 	# Format message with logtype prefix to maintain original format
 	message = '[' + logtype.upper() + '] ' + event
 	_event_logger.info(message)
+
+def _setup_health_logger():
+	"""Initialize a separate rotating logger for health/debug messages."""
+	logger = logging.getLogger('garage_zero_health')
+	logger.setLevel(logging.INFO)
+
+	os.makedirs('logs', exist_ok=True)
+
+	handler = RotatingFileHandler(
+		'logs/health.log',
+		maxBytes=500000,   # 500 KB
+		backupCount=3,
+		encoding='utf-8'
+	)
+	formatter = logging.Formatter('%(asctime)s %(message)s',
+								  datefmt='%Y-%m-%d %H:%M:%S')
+	handler.setFormatter(formatter)
+	logger.addHandler(handler)
+	return logger
+
+_health_logger = _setup_health_logger()
+
+def write_health_log(event, logtype='HEALTH'):
+	"""Write a message to the separate health/debug log (logs/health.log)."""
+	message = '[' + logtype.upper() + '] ' + event
+	_health_logger.info(message)

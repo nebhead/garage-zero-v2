@@ -98,7 +98,8 @@ def default_settings():
 	settings['addons'].append(default_raspi_heartbeat_obj_data())
 
 	settings['debug'] = {
-		'enable' : False
+		'enable' : False,
+		'health_log' : False
 	}
 
 	settings['api_config'] = {

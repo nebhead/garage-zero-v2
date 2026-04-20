@@ -259,6 +259,41 @@
 <!-- End MQTT Home Assistant Integration Card -->
 <br><br>
 
+<!-- Debug & Health Logging Card -->
+<div class="card shadow">
+	<div class="card-header bg-primary">
+		<i class="fas fa-stethoscope"></i>&nbsp; Debug &amp; Health Logging
+	</div>
+	<div class="card-body">
+		<form name="debug_settings" action="/settings" method="POST">
+		<input type="hidden" name="debug_settings_submitted" value="1">
+		<div class="card shadow">
+			<div class="card-header bg-info">
+				<i class="fas fa-file-medical-alt"></i>&nbsp; Health Log
+			</div>
+			<div class="card-body">
+				<p>
+					When enabled, a periodic health snapshot is written to <code>logs/health.log</code> every 5 minutes.
+					The snapshot includes Redis latency, MQTT connection state, system load, available memory, and IP address.
+					This log is separate from the main event log and is useful for diagnosing long-run instability.
+				</p>
+				<div class="form-check form-switch mb-3">
+					<input class="form-check-input" type="checkbox" id="health_log_enabled" name="health_log_enabled" {% if settings['debug'].get('health_log', False) %}checked{% endif %}>
+					<label class="form-check-label" for="health_log_enabled">
+						<strong>Enable Health Logging</strong> (writes to <code>logs/health.log</code>)
+					</label>
+				</div>
+			</div>
+			<div class="card-footer">
+				<button type="submit" class="btn btn-primary">Save Debug Settings</button>
+			</div>
+		</div>
+		</form>
+	</div>
+</div>
+<!-- End Debug & Health Logging Card -->
+<br><br>
+
 <!-- Door Settings Services Card -->
 <div class="card shadow">
 	<div class="card-header bg-primary">

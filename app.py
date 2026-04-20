@@ -396,6 +396,14 @@ def settings_base(action=None):
 		alert['type'] = 'success'
 		alert['text'] = 'MQTT Home Assistant settings updated. Changes will take effect when control.py reloads.'
 
+	# Update Debug / Health Logging Settings
+	if(request.form.get('debug_settings_submitted') == '1'):
+		settings.setdefault('debug', {})['health_log'] = 'health_log_enabled' in request.form
+		write_settings(settings)
+		cmdsts.set('settings_update', 'true')
+		alert['type'] = 'success'
+		alert['text'] = 'Debug settings updated.'
+
 	if('del_door' in request.form):
 		delete_door_id = request.form['del_door']
 		alert['type'] = 'error'

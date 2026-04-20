@@ -23,7 +23,7 @@
 from common import read_settings
 import redis
 import notify
-from gzlogging import write_log
+from gzlogging import write_log, write_health_log
 import time
 import os
 import socket
@@ -124,7 +124,8 @@ def main():
 		# Periodic health heartbeat for long-run diagnostics
 		now = time.time()
 		if now >= next_health_log:
-			log_health_status(mqtt_ha)
+			if settings.get('debug', {}).get('health_log', False):
+				log_health_status(mqtt_ha)
 			next_health_log = now + health_log_interval
 			
 		#print('... looping ...')
@@ -225,12 +226,12 @@ def log_health_status(mqtt_ha=None):
 	mqtt_connected = bool(getattr(mqtt_ha, 'connected', False)) if mqtt_ha else False
 
 	health_message = (
-		f"health redis_ok={redis_ok} redis_ms={redis_ms:.2f} "
+		f"redis_ok={redis_ok} redis_ms={redis_ms:.2f} "
 		f"mqtt_enabled={mqtt_enabled} mqtt_connected={mqtt_connected} "
 		f"load=({load1:.2f},{load5:.2f},{load15:.2f}) "
 		f"mem_avail_kb={mem_avail_kb} ip={ip_address}"
 	)
-	write_log(health_message, logtype='HEALTH')
+	write_health_log(health_message, logtype='HEALTH')
 
 if __name__ == "__main__":
 	main()
