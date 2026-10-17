@@ -301,6 +301,7 @@
 {% endblock %}
 
 {% block scripts %}
+{% include '_update_script.html' %}
 <script>
 $('#enable_security').change(function() {
 	if ($('#enable_security').prop('checked')) {

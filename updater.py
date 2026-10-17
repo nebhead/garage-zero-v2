@@ -26,7 +26,7 @@ APP_DIR = os.path.dirname(os.path.abspath(__file__))
 MANIFEST_FILE = 'version.json'
 REQUIREMENTS_FILE = os.path.join('auto-install', 'requirements.txt')
 CHECK_CACHE_SECONDS = 6 * 3600
-GIT_TIMEOUT = 60
+GIT_TIMEOUT = 25  # must stay under the gunicorn worker timeout (30s)
 RESTART_DELAY = 5  # seconds between update completion and restart, lets the UI read the final status
 
 _lock = threading.Lock()
@@ -58,7 +58,7 @@ def get_version():
 	return m['version'] if m else 'unknown'
 
 def _git(*args, timeout=GIT_TIMEOUT):
-	env = dict(os.environ, GIT_TERMINAL_PROMPT='0')
+	env = dict(os.environ, GIT_TERMINAL_PROMPT='0', GIT_SSH_COMMAND='ssh -o BatchMode=yes -o ConnectTimeout=10')
 	p = subprocess.run(['git', *args], cwd=APP_DIR, capture_output=True, text=True, timeout=timeout, env=env)
 	return p.returncode, (p.stdout + p.stderr).strip()
 
@@ -135,7 +135,7 @@ def _log(line):
 
 def _run_streaming(cmd):
 	"""Run a command, streaming output lines to the update log. Returns exit code."""
-	env = dict(os.environ, GIT_TERMINAL_PROMPT='0')
+	env = dict(os.environ, GIT_TERMINAL_PROMPT='0', GIT_SSH_COMMAND='ssh -o BatchMode=yes -o ConnectTimeout=10')
 	_log(f'$ {" ".join(cmd)}')
 	try:
 		p = subprocess.Popen(cmd, cwd=APP_DIR, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)
