@@ -10,6 +10,7 @@ from gzlogging import *
 import redis
 import secrets
 import time
+import updater
 
 """
 Globals
@@ -98,9 +99,41 @@ class EventForm(FlaskForm):
 	logtype = SelectField('Log Type (Displayed in Log)', choices=['OPENED', 'OPEN', 'REMIND', 'CLOSED'])
 	notifylist = SelectMultipleField('Select Notification Services', choices=[], validate_choice=False)
 
+@app.context_processor
+def inject_version():
+	return {'app_version': updater.get_version()}
+
 """
 App Route Functions Begin
 """
+
+def update_auth_ok():
+	return not (settings['misc']['password'] == True and 'active' not in session)
+
+@app.route('/ping')
+def ping():
+	return jsonify({'result': 'ok'})
+
+@app.route('/update/<action>', methods=['POST', 'GET'])
+def update_api(action=None):
+	if not update_auth_ok():
+		return jsonify({'result': 'fail', 'error': 'Not authorized.'}), 401
+
+	if action == 'check':
+		force = request.values.get('force') == 'true'
+		return jsonify(updater.check_for_updates(force=force))
+
+	if action == 'start' and request.method == 'POST':
+		if updater.start_update():
+			write_log('Software update started.', logtype='UPDATE')
+			return jsonify({'result': 'success'})
+		return jsonify({'result': 'fail', 'error': 'An update is already in progress.'}), 409
+
+	if action == 'status':
+		since = request.values.get('since', 0, type=int)
+		return jsonify(updater.get_update_status(since))
+
+	return jsonify({'result': 'fail', 'error': 'Unknown action.'}), 404
 
 @app.route('/login', methods=['POST', 'GET'])
 def loginpage():

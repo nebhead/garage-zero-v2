@@ -315,6 +315,24 @@ else
    echo "No WebUI Setup." | tee -a ~/logs/install.log
 fi
 
+# Allow the web app's updater to restart services / reboot without a password (passwordless sudo for these commands only)
+echo " + Configuring sudoers for software updates" | tee -a ~/logs/install.log
+SUDOERS_TMP=$(mktemp)
+{
+    echo "# Allow garage-zero software updater to restart services or reboot"
+    SVCTL=$(command -v supervisorctl)
+    [ -n "$SVCTL" ] && echo "$USER ALL=(root) NOPASSWD: $SVCTL restart all"
+    for REBOOT_BIN in $(command -v reboot) /usr/sbin/reboot /sbin/reboot /usr/bin/reboot; do
+        [ -e "$REBOOT_BIN" ] && echo "$USER ALL=(root) NOPASSWD: $REBOOT_BIN"
+    done | sort -u
+} > "$SUDOERS_TMP"
+if $SUDO visudo -cf "$SUDOERS_TMP" > /dev/null 2>&1; then
+    $SUDO install -m 0440 -o root -g root "$SUDOERS_TMP" /etc/sudoers.d/garage-zero 2>&1 | tee -a ~/logs/install.log
+else
+    echo " !! Generated sudoers rules failed validation; skipping. Updates will need manual sudo configuration." | tee -a ~/logs/install.log
+fi
+rm -f "$SUDOERS_TMP"
+
 # If supervisor isn't already running, startup Supervisor
 $SUDO service supervisor start 2>&1 | tee -a ~/logs/install.log
 

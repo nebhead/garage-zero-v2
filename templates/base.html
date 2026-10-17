@@ -69,6 +69,9 @@
 	{% endblock %}
 	{% block notify %} {% endblock %}<br>
 	{% block content %} {% endblock %}<br>
+	{% block watermark %}
+	<div class="text-center text-muted pb-2" style="font-size: 0.7rem; opacity: 0.6;">Garage Zero {{ app_version }}</div>
+	{% endblock %}
 	<!-- jQuery and Bootstrap Bundle (includes Popper) -->
 	<script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
 	<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>

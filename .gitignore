@@ -6,6 +6,7 @@ gh-pages/
 local/
 
 *.json
+!version.json
 
 *.code-workspace
 

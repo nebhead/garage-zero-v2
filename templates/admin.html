@@ -3,6 +3,7 @@
 {% block title %} Admin & Settings {% endblock %}
 
 {% block notify %}
+{% include '_update_banner.html' %}
 <!-- Success -->
   {% if (alert['type'] == 'success') %}
   <div class="container">
@@ -28,8 +29,12 @@
   {% endif %}
 {% endblock %}
 
+{% block watermark %}{% endblock %}
+
 {% block content %}  
 <div class="container">
+
+{% include '_update_card.html' %}
 
 <!-- Security Settings -->
 

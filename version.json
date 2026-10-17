@@ -1,0 +1,12 @@
+{
+	"name": "Garage Zero",
+	"version": "v2.2.0",
+	"releases": {
+		"v2.2.0": {
+			"date": "2026-10-16",
+			"notes": "Initial versioned release. Adds in-app update checker.",
+			"requires_pip": false,
+			"requires_reboot": false
+		}
+	}
+}
