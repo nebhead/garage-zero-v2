@@ -44,11 +44,13 @@ def read_log(num_events=0, twentyfourhtime=True):
 	# *****************************************
 
 	# Collect all available log files in order (newest to oldest)
-	log_files = ['logs/events.log']
-	for i in range(1, 4):  # Check for .1, .2, .3 backup files
+	# Order oldest to newest so the last lines are the most recent events
+	log_files = []
+	for i in range(3, 0, -1):  # Check for .3, .2, .1 backup files
 		backup_file = f'logs/events.log.{i}'
 		if os.path.exists(backup_file):
 			log_files.append(backup_file)
+	log_files.append('logs/events.log')
 
 	# Read all lines from all log files
 	event_lines = []
@@ -72,12 +74,12 @@ def read_log(num_events=0, twentyfourhtime=True):
 	if (event_line_length == 0):
 		num_events = 0
 	else: 
-		if ((num_events == 0) or (num_events > event_line_length)):
+		if ((num_events == 0) or (num_events >= event_line_length)):
 			# Get all events in file
 			for x in range(event_line_length):
 				event_list.append(event_lines[x].split(" ",3))
 			num_events = event_line_length
-		elif (num_events < event_line_length): 
+		else:
 			# Get just the last num_events in list
 			for x in range(event_line_length-num_events, event_line_length):
 				event_list.append(event_lines[x].split(" ",3))
@@ -88,6 +90,50 @@ def read_log(num_events=0, twentyfourhtime=True):
 				event_list[x][1] = convertedtime.strftime("%I:%M:%S %p") # Convert to 12 hour time for display
 
 	return(event_list, num_events)
+
+LOG_FILES = {'events': 'logs/events.log', 'health': 'logs/health.log'}
+
+def log_exists(logname):
+	"""Return True if the named log ('events' or 'health') exists on disk."""
+	return os.path.exists(LOG_FILES.get(logname, ''))
+
+def read_log_page(logname='events', page=1, per_page=50, twentyfourhtime=True):
+	# *****************************************
+	# Function: read_log_page
+	# Output: event_list (oldest to newest within the page), total_events, page, total_pages
+	# Description: Page 1 is the most recent set of records. Includes rotated backups.
+	# *****************************************
+	base = LOG_FILES.get(logname, LOG_FILES['events'])
+	files = [f'{base}.{i}' for i in range(3, 0, -1)] + [base]
+	lines = []
+	for path in files:
+		if os.path.exists(path):
+			try:
+				with open(path, 'r', encoding='utf-8', errors='replace') as f:
+					lines.extend(l for l in f.read().splitlines() if l.strip())
+			except (IOError, OSError):
+				pass
+
+	total = len(lines)
+	per_page = max(1, per_page)
+	total_pages = max(1, -(-total // per_page))
+	page = min(max(1, page), total_pages)
+
+	end = total - (page - 1) * per_page
+	start = max(0, end - per_page)
+
+	event_list = []
+	for line in lines[start:end]:
+		parts = line.split(" ", 3)
+		parts += [''] * (4 - len(parts))
+		if not twentyfourhtime:
+			try:
+				parts[1] = datetime.datetime.strptime(parts[1], "%H:%M:%S").strftime("%I:%M:%S %p")
+			except ValueError:
+				pass
+		event_list.append(parts)
+
+	return event_list, total, page, total_pages
 
 def write_log(event, logtype='NONE'):
 	# *****************************************

@@ -315,9 +315,26 @@ def history():
 				settings['misc']['24htime'] = False 
 			write_settings(settings)
 
-	door_history, events = read_log(twentyfourhtime=settings['misc']['24htime'])
+	def _int_arg(name, default):
+		try:
+			return int(request.values.get(name, default))
+		except (TypeError, ValueError):
+			return default
 
-	return render_template('history.html', door_history=door_history, events=events, pagetheme=settings['misc']['theme'], settings=settings)
+	logname = request.values.get('log', 'events')
+	if logname not in ('events', 'health') or not log_exists(logname):
+		logname = 'events'
+	per_page = _int_arg('per_page', 50)
+	if per_page not in (10, 25, 50, 100, 250, 500):
+		per_page = 50
+	page = _int_arg('page', 1)
+
+	door_history, total, page, total_pages = read_log_page(logname, page, per_page, twentyfourhtime=settings['misc']['24htime'])
+
+	return render_template('history.html', door_history=door_history, events=len(door_history), total=total,
+		page=page, total_pages=total_pages, per_page=per_page, logname=logname,
+		health_available=log_exists('health'), per_page_options=(10, 25, 50, 100, 250, 500),
+		pagetheme=settings['misc']['theme'], settings=settings)
 
 @app.route('/settings', methods=['POST','GET'])
 def settings_base(action=None):

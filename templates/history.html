@@ -11,6 +11,9 @@
             <div class="card-body">
               
               <form name="listoptions" method="POST" action="/history">
+                <input type="hidden" name="log" value="{{ logname }}">
+                <input type="hidden" name="per_page" value="{{ per_page }}">
+                <input type="hidden" name="page" value="{{ page }}">
                 {% if settings['misc']['listorder'] == 'topdown' %}
                 <button class="btn btn-primary" type="submit" id="listorder" name="listorder" value="bottomup"><i class="fas fa-sort-amount-up-alt"></i> Sort</button>
                 {% else %}
@@ -28,6 +31,28 @@
                 </div>
 
               </form><br>
+
+              <form name="viewoptions" method="GET" action="/history" class="row g-2 align-items-center mb-3">
+                {% if health_available %}
+                <div class="col-auto">
+                  <select class="form-select" name="log" onchange="this.form.submit()">
+                    <option value="events" {% if logname == 'events' %}selected{% endif %}>Event Log</option>
+                    <option value="health" {% if logname == 'health' %}selected{% endif %}>Health Log</option>
+                  </select>
+                </div>
+                {% else %}
+                <input type="hidden" name="log" value="events">
+                {% endif %}
+                <div class="col-auto">
+                  <select class="form-select" name="per_page" onchange="this.form.page.value=1; this.form.submit()">
+                    {% for n in per_page_options %}
+                    <option value="{{ n }}" {% if n == per_page %}selected{% endif %}>{{ n }} per page</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <input type="hidden" name="page" value="{{ page }}">
+                <div class="col-auto text-muted">{{ total }} records</div>
+              </form>
 
               <div class="table-responsive">
                 <table class="table table-striped">
@@ -80,6 +105,19 @@
                     </tbody>
                 </table>
               </div>
+
+              {% if total_pages > 1 %}
+              {% set qs = '&log=' ~ logname ~ '&per_page=' ~ per_page %}
+              <nav>
+                <ul class="pagination justify-content-center flex-wrap">
+                  <li class="page-item {% if page <= 1 %}disabled{% endif %}"><a class="page-link" href="/history?page=1{{ qs }}">&laquo;</a></li>
+                  <li class="page-item {% if page <= 1 %}disabled{% endif %}"><a class="page-link" href="/history?page={{ page - 1 }}{{ qs }}">Newer</a></li>
+                  <li class="page-item disabled"><span class="page-link">Page {{ page }} of {{ total_pages }}</span></li>
+                  <li class="page-item {% if page >= total_pages %}disabled{% endif %}"><a class="page-link" href="/history?page={{ page + 1 }}{{ qs }}">Older</a></li>
+                  <li class="page-item {% if page >= total_pages %}disabled{% endif %}"><a class="page-link" href="/history?page={{ total_pages }}{{ qs }}">&raquo;</a></li>
+                </ul>
+              </nav>
+              {% endif %}
             </div> <!-- End of Card Body -->
           </div> <!-- End of Card -->
         </div> <!-- End of Col -->
