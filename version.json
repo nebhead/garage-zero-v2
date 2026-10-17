@@ -1,10 +1,16 @@
 {
 	"name": "Garage Zero",
-	"version": "v2.2.0",
+	"version": "v2.2.1",
 	"releases": {
 		"v2.2.0": {
 			"date": "2026-10-16",
 			"notes": "Initial versioned release. Adds in-app update checker.",
+			"requires_pip": false,
+			"requires_reboot": false
+		},
+		"v2.2.1": {
+			"date": "2026-10-16",
+			"notes": "Fixes for MQTT Spurious Messages and Log Display.",
 			"requires_pip": false,
 			"requires_reboot": false
 		}
