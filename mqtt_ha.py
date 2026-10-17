@@ -99,6 +99,10 @@ class MQTTHomeAssistant:
 		# Track last known states to avoid redundant publishes
 		self.last_states = {}
 		
+		# Commanded transitions: door_id -> time the command was issued
+		self.command_times = {}
+		self.transition_timeout = 30
+		
 		# Initialize MQTT client
 		hostname = socket.gethostname().replace(' ', '_')
 		client_id = f"garage-zero-{hostname}-{os.getpid()}"
@@ -184,10 +188,12 @@ class MQTTHomeAssistant:
 			if command == 'OPEN' and current_state == 'closed':
 				# Only open if door is closed
 				self.cmdsts.hset('doorobj:' + door_obj.id, 'doorbutton', '1')
+				self.command_times[self._sanitize_id(door_obj.id)] = time.time()
 				self._publish_state(door_obj, 'opening')
 			elif command == 'CLOSE' and current_state == 'open':
 				# Only close if door is open
 				self.cmdsts.hset('doorobj:' + door_obj.id, 'doorbutton', '1')
+				self.command_times[self._sanitize_id(door_obj.id)] = time.time()
 				self._publish_state(door_obj, 'closing')
 			elif command == 'STOP' and current_state in ['opening', 'closing']:
 				# Only stop if door is moving
@@ -220,14 +226,25 @@ class MQTTHomeAssistant:
 		Returns:
 			State string: 'open', 'closed', 'opening', 'closing', or 'unknown'
 		"""
-		# Check if we're in a transitional state from command
 		door_id = self._sanitize_id(door_obj.id)
-		if door_id in self.last_states:
-			last_state = self.last_states[door_id]
-			# If last published state was opening/closing, check if enough time passed
-			if last_state in ['opening', 'closing']:
-				# We'll rely on actual sensor updates to change to open/closed
-				pass
+		actual = self._read_door_state(door_obj)
+		
+		# After a command, the origin limit sensor stays active until the door
+		# leaves it. Hold opening/closing until the door moves or the timeout passes.
+		started = self.command_times.get(door_id)
+		if started is not None:
+			last_state = self.last_states.get(door_id)
+			origin = {'opening': 'closed', 'closing': 'open'}.get(last_state)
+			if (origin and actual == origin
+					and time.time() - started < self.transition_timeout):
+				return last_state
+			self.command_times.pop(door_id, None)
+		
+		return actual
+	
+	def _read_door_state(self, door_obj):
+		"""Determine door state from sensors and the previous published state."""
+		door_id = self._sanitize_id(door_obj.id)
 		
 		# Read actual sensor states from Redis
 		has_open_sensor = 'limitsensoropen' in door_obj.inpins
